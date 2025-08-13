@@ -1,4 +1,4 @@
-# Rada Alert Manager v03 mafr with Firebase Studio
+# Rada Alert Manager v03 made with Firebase Studio
 
 This is a NextJS starter in Firebase Studio.
 
