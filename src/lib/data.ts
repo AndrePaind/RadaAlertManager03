@@ -11,6 +11,10 @@ export const countries: Country[] = [
       { id: 'santander', name: 'Santander', path: 'M200 100 L240 90 L250 140 L210 150 Z' },
       { id: 'bolivar', name: 'Bolívar', path: 'M180 40 L230 30 L240 80 L190 90 Z' },
       { id: 'amazonas', name: 'Amazonas', path: 'M250 250 L350 240 L360 290 L260 295 Z' },
+      { id: 'cundinamarca', name: 'Cundinamarca', path: 'M175 125 L215 120 L220 165 L180 170 Z' },
+      { id: 'boyaca', name: 'Boyacá', path: 'M210 80 L250 75 L255 125 L215 130 Z' },
+      { id: 'narino', name: 'Nariño', path: 'M90 230 L120 220 L130 260 L100 270 Z' },
+      { id: 'magdalena', name: 'Magdalena', path: 'M190 20 L240 15 L245 65 L195 70 Z' },
     ]
   },
   {
@@ -72,6 +76,7 @@ export const alerts: Alert[] = [
 ];
 
 export const forecastProviders: ForecastProvider[] = [
+    { id: 'reality', name: 'Reality' },
     { id: 'google', name: 'Google Weather' },
     { id: 'openweather', name: 'OpenWeather' },
     { id: 'other', name: 'Other Provider' },
@@ -80,39 +85,68 @@ export const forecastProviders: ForecastProvider[] = [
 export const statsByRegion: { [regionId: string]: Stats } = {
   // Colombia
   'bogota': {
+    'reality': { green: 260000, yellow: 75000, orange: 15000, red: 1000, total: 351000 },
     'google': { green: 250000, yellow: 80000, orange: 20000, red: 1500, total: 351500 },
     'openweather': { green: 280000, yellow: 70000, orange: 15000, red: 1000, total: 366000 },
   },
   'antioquia': {
+    'reality': { green: 190000, yellow: 55000, orange: 12000, red: 800, total: 257800 },
     'google': { green: 180000, yellow: 60000, orange: 15000, red: 1000, total: 256000 },
     'openweather': { green: 200000, yellow: 50000, orange: 12000, red: 800, total: 262800 },
   },
   'valle-del-cauca': {
+    'reality': { green: 165000, yellow: 48000, orange: 9000, red: 450, total: 222450 },
     'google': { green: 160000, yellow: 50000, orange: 10000, red: 500, total: 220500 },
     'openweather': { green: 170000, yellow: 45000, orange: 8000, red: 400, total: 223400 },
   },
   'santander': {
+    'reality': { green: 125000, yellow: 38000, orange: 7500, red: 350, total: 170850 },
     'google': { green: 120000, yellow: 40000, orange: 8000, red: 400, total: 168400 },
     'openweather': { green: 130000, yellow: 35000, orange: 7000, red: 300, total: 172300 },
   },
   'bolivar': {
+    'reality': { green: 105000, yellow: 28000, orange: 4500, red: 180, total: 137680 },
     'google': { green: 100000, yellow: 30000, orange: 5000, red: 200, total: 135200 },
     'openweather': { green: 110000, yellow: 25000, orange: 4000, red: 150, total: 139150 },
   },
   'amazonas': {
+    'reality': { green: 5500, yellow: 2200, orange: 1100, red: 550, total: 9350 },
     'google': { green: 5000, yellow: 2000, orange: 1000, red: 500, total: 8500 },
     'openweather': { green: 6000, yellow: 2500, orange: 1200, red: 600, total: 10300 },
   },
+  'cundinamarca': {
+    'reality': { green: 95000, yellow: 32000, orange: 6000, red: 250, total: 133250 },
+    'google': { green: 90000, yellow: 35000, orange: 7000, red: 300, total: 132300 },
+    'openweather': { green: 100000, yellow: 30000, orange: 6500, red: 200, total: 136700 },
+  },
+  'boyaca': {
+    'reality': { green: 85000, yellow: 28000, orange: 5000, red: 200, total: 118200 },
+    'google': { green: 80000, yellow: 30000, orange: 5500, red: 250, total: 115750 },
+    'openweather': { green: 90000, yellow: 25000, orange: 5000, red: 150, total: 120150 },
+  },
+  'narino': {
+    'reality': { green: 75000, yellow: 25000, orange: 4000, red: 150, total: 104150 },
+    'google': { green: 70000, yellow: 28000, orange: 4500, red: 200, total: 102700 },
+    'openweather': { green: 80000, yellow: 22000, orange: 3500, red: 100, total: 105600 },
+  },
+  'magdalena': {
+    'reality': { green: 65000, yellow: 22000, orange: 3500, red: 100, total: 90600 },
+    'google': { green: 60000, yellow: 25000, orange: 4000, red: 150, total: 89150 },
+    'openweather': { green: 70000, yellow: 20000, orange: 3000, red: 100, total: 93100 },
+  },
   // Kenya
   'nairobi': {
+    'reality': { green: 16000, yellow: 4500, orange: 1000, red: 80, total: 21580 },
     'google': { green: 15000, yellow: 5000, orange: 1200, red: 100, total: 21300 },
     'openweather': { green: 18000, yellow: 2500, orange: 800, red: 50, total: 21350 },
   },
   'mombasa': {
+    'reality': { green: 8500, yellow: 2800, orange: 480, red: 18, total: 11798 },
     'google': { green: 8000, yellow: 3000, orange: 500, red: 20, total: 11520 },
     'openweather': { green: 9000, yellow: 2000, orange: 450, red: 15, total: 11465 },
   },
   'rift-valley': {
+    'reality': { green: 26000, yellow: 9000, orange: 2800, red: 450, total: 38250 },
     'google': { green: 25000, yellow: 10000, orange: 3000, red: 500, total: 38500 },
     'openweather': { green: 28000, yellow: 8000, orange: 2500, red: 400, total: 38900 },
   }
@@ -120,10 +154,12 @@ export const statsByRegion: { [regionId: string]: Stats } = {
 
 export const nationalStats: { [countryId: string]: Stats } = {
     'colombia': {
+      'reality': { green: 2600000, yellow: 750000, orange: 120000, red: 9000, total: 3479000 },
       'google': { green: 2500000, yellow: 800000, orange: 150000, red: 10000, total: 3460000 },
       'openweather': { green: 2700000, yellow: 700000, orange: 120000, red: 8000, total: 3528000 },
     },
     'kenya': {
+        'reality': { green: 160000, yellow: 45000, orange: 10000, red: 800, total: 215800 },
         'google': { green: 150000, yellow: 50000, orange: 12000, red: 1000, total: 213000 },
         'openweather': { green: 180000, yellow: 25000, orange: 8000, red: 500, total: 213500 },
     }
