@@ -72,7 +72,7 @@ export type UserStats = {
 
 /**
  * Represents the complete statistical data for a given scope (national or regional).
- * It's a dictionary where each key is a provider ID (e.g., 'reality', 'google')
+ * It's a dictionary where each key is a provider ID (e.g., 'actual', 'google')
  * and the value is the UserStats for that provider.
  */
 export type Stats = {

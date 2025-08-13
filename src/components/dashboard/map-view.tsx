@@ -6,7 +6,7 @@
  * The map is an SVG where each region is a `<path>` element.
  */
 
-import type { Country, Region } from '@/lib/types';
+import type { Country, Region, Severity } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
@@ -16,6 +16,7 @@ interface MapViewProps {
   selectedRegions: Region[]; // An array of currently selected regions.
   onToggleRegion: (region: Region) => void; // Callback function to handle region selection/deselection.
   canSelectRegions: boolean; // Controls whether regions can be selected.
+  regionSeverities: Map<string, Severity>; // Map of region IDs to their current severity level.
 }
 
 interface RegionWithCenter extends Region {
@@ -23,7 +24,7 @@ interface RegionWithCenter extends Region {
     centerY: number;
 }
 
-export function MapView({ country, selectedRegions, onToggleRegion, canSelectRegions }: MapViewProps) {
+export function MapView({ country, selectedRegions, onToggleRegion, canSelectRegions, regionSeverities }: MapViewProps) {
     const [regionsWithCenters, setRegionsWithCenters] = useState<RegionWithCenter[]>([]);
 
     useEffect(() => {
@@ -31,13 +32,14 @@ export function MapView({ country, selectedRegions, onToggleRegion, canSelectReg
         // This avoids the "document is not defined" error during server-side rendering.
         const calculatedRegions = country.regions.map(region => {
             const tempDiv = document.createElement('div');
-            const pathElement = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            pathElement.setAttribute("d", region.path);
-
-            // We need to append it to something to getBBox, but it can be invisible.
+            // Create a temporary SVG to accurately measure the bounding box of the path
             const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             svg.style.visibility = 'hidden';
             svg.style.position = 'absolute';
+
+            const pathElement = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            pathElement.setAttribute("d", region.path);
+
             svg.appendChild(pathElement);
             tempDiv.appendChild(svg);
             document.body.appendChild(tempDiv);
@@ -55,6 +57,11 @@ export function MapView({ country, selectedRegions, onToggleRegion, canSelectReg
         setRegionsWithCenters(calculatedRegions);
     }, [country.regions]);
 
+    const severityColorMap: Record<Severity, string> = {
+        yellow: 'fill-yellow-400/70',
+        orange: 'fill-orange-500/70',
+        red: 'fill-red-600/70',
+    };
 
   return (
     <Card className="flex-1 flex flex-col">
@@ -70,6 +77,8 @@ export function MapView({ country, selectedRegions, onToggleRegion, canSelectReg
             <rect width="100%" height="100%" fill="currentColor" className="text-white dark:text-gray-800" />
             {regionsWithCenters.map((region) => {
               const isSelected = selectedRegions.some(sr => sr.id === region.id);
+              const severity = regionSeverities.get(region.id);
+              const severityColor = severity ? severityColorMap[severity] : 'fill-primary/20';
               
               return (
                 <g key={region.id} onClick={() => canSelectRegions && onToggleRegion(region)} className={cn("group", canSelectRegions && "cursor-pointer")}>
@@ -77,8 +86,10 @@ export function MapView({ country, selectedRegions, onToggleRegion, canSelectReg
                     d={region.path}
                     className={cn(
                       'stroke-primary/50 stroke-2 transition-all',
-                      isSelected ? 'fill-primary/70' : 'fill-primary/20 group-hover:fill-primary/40',
-                      !canSelectRegions && 'fill-gray-200'
+                      isSelected ? 'fill-primary/70' : severityColor,
+                      !canSelectRegions && severity ? severityColor : '',
+                      !canSelectRegions && !severity ? 'fill-gray-200' : '',
+                      canSelectRegions && 'group-hover:fill-primary/40'
                     )}
                   />
                   {/* Tooltip-like text on hover */}

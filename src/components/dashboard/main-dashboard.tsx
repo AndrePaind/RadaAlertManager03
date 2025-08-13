@@ -11,7 +11,7 @@
  */
 
 import { useState, useMemo } from 'react';
-import type { Alert, Country, Region, Stats } from '@/lib/types';
+import type { Alert, Country, Region, Severity, Stats } from '@/lib/types';
 // FAKE DATA: Importing mock data. In a real application, this would be fetched from a backend API.
 import { alerts as initialAlerts, countries, statsByRegion, nationalStats } from '@/lib/data';
 import { AlertsList } from './alerts-list';
@@ -21,6 +21,9 @@ import { StatsPanel } from './stats-panel';
 import { AlertForm } from './alert-form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card } from '../ui/card';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { addDays, format } from 'date-fns';
 
 export function MainDashboard() {
   // STATE MANAGEMENT
@@ -43,7 +46,15 @@ export function MainDashboard() {
   // A flag to indicate if the user is in the process of creating a new alert.
   const [isCreatingNew, setIsCreatingNew] = useState(false);
 
+  // The currently selected date for viewing forecasts and alerts.
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+
   // HANDLERS
+
+  const handleDateChange = (days: number) => {
+    setCurrentDate(prevDate => addDays(prevDate, days));
+  };
   
   /**
    * Handles changing the selected country.
@@ -141,6 +152,39 @@ export function MainDashboard() {
   }, [alerts, selectedCountry]);
 
   /**
+   * Gets the active alerts for the selected date.
+   */
+  const activeAlertsOnDate = useMemo(() => {
+    return countryAlerts.filter(alert => {
+      const from = new Date(alert.eventDates.from);
+      from.setHours(0,0,0,0);
+      const to = alert.eventDates.to ? new Date(alert.eventDates.to) : from;
+      to.setHours(23,59,59,999);
+      const checkDate = new Date(currentDate);
+      checkDate.setHours(0,0,0,0);
+      return checkDate >= from && checkDate <= to;
+    })
+  }, [countryAlerts, currentDate]);
+
+  /**
+   * Computes the severity for each region based on active alerts for the selected date.
+   */
+  const regionSeverities = useMemo(() => {
+    const severities = new Map<string, Severity>();
+    const severityOrder: Severity[] = ['yellow', 'orange', 'red'];
+    
+    for (const alert of activeAlertsOnDate) {
+      for (const regionId of alert.regionIds) {
+        const currentSeverity = severities.get(regionId);
+        if (!currentSeverity || severityOrder.indexOf(alert.severity) > severityOrder.indexOf(currentSeverity)) {
+          severities.set(regionId, alert.severity);
+        }
+      }
+    }
+    return severities;
+  }, [activeAlertsOnDate]);
+
+  /**
    * Computes the statistics to display in the StatsPanel.
    * It shows national stats if no regions are selected, or aggregates stats for the selected regions.
    * @backend-note This logic for aggregating stats is performed on the client.
@@ -186,7 +230,7 @@ export function MainDashboard() {
 
   return (
     <div className="flex flex-col h-screen">
-      <div className="p-4 md:px-6 border-b">
+      <div className="p-4 md:px-6 border-b flex justify-between items-center">
         <Select value={selectedCountry.id} onValueChange={handleSelectCountry}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Select a country" />
@@ -197,6 +241,18 @@ export function MainDashboard() {
             ))}
           </SelectContent>
         </Select>
+
+        <div className="flex items-center gap-4">
+            <Button variant="outline" size="icon" onClick={() => handleDateChange(-1)}>
+                <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <div className="text-center font-medium">
+                <p>{format(currentDate, 'PPP')}</p>
+            </div>
+            <Button variant="outline" size="icon" onClick={() => handleDateChange(1)}>
+                <ChevronRight className="h-4 w-4" />
+            </Button>
+        </div>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 md:p-6">
         {/* Left Column: Alerts List */}
@@ -220,6 +276,7 @@ export function MainDashboard() {
                   selectedRegions={selectedRegions}
                   onToggleRegion={handleToggleRegion}
                   canSelectRegions={canSelectRegions}
+                  regionSeverities={regionSeverities}
                 />
               </div>
               <LayerControls />
