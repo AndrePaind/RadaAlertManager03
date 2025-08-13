@@ -47,12 +47,12 @@ export function MapView({ country, selectedRegions, onToggleRegion }: MapViewPro
                 <Button
                     variant={"outline"}
                     className={cn(
-                    "w-[240px] justify-start text-left font-normal",
+                    "w-auto md:w-[240px] justify-start text-left font-normal",
                     !date && "text-muted-foreground"
                     )}
                 >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                    {date ? <span className="hidden md:inline">{format(date, "PPP")}</span> : <span>Pick a date</span>}
                 </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
@@ -71,9 +71,9 @@ export function MapView({ country, selectedRegions, onToggleRegion }: MapViewPro
         </div>
       </CardHeader>
       <CardContent className="flex-1 flex items-center justify-center p-2">
-        <div className="w-full h-full rounded-lg bg-blue-100 dark:bg-blue-900/20 overflow-hidden relative" data-ai-hint="country map">
+        <div className="w-full h-full rounded-lg bg-white dark:bg-gray-800 overflow-hidden relative" data-ai-hint="country map">
           <svg viewBox="0 0 400 300" className="w-full h-full">
-            <rect width="100%" height="100%" fill="currentColor" />
+            <rect width="100%" height="100%" fill="currentColor" className="text-white dark:text-gray-800" />
             {countryRegions.map((region) => {
               const isSelected = selectedRegions.some(sr => sr.id === region.id);
               return (
@@ -85,7 +85,7 @@ export function MapView({ country, selectedRegions, onToggleRegion }: MapViewPro
                       isSelected ? 'fill-primary/70' : 'fill-primary/20 group-hover:fill-primary/40'
                     )}
                   />
-                  <text x={10} y={280} fontSize="10" fill="white" className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                  <text x={10} y={280} fontSize="10" fill="black" className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
                     {region.name}
                   </text>
                 </g>
