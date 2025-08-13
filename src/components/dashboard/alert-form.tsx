@@ -1,3 +1,4 @@
+
 'use client';
 /**
  * @fileoverview This component renders a form for creating or editing an alert.
@@ -38,7 +39,6 @@ import { suggestJustificationAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
-import { ScrollArea } from '../ui/scroll-area';
 
 // Defines the schema for the alert form using Zod for validation.
 const alertFormSchema = z.object({
@@ -175,158 +175,162 @@ export function AlertForm({ alert, country, selectedRegions, onSave, onDelete, o
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <div className="flex-grow overflow-y-auto">
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* Region Display */}
-              <div className="space-y-2">
-                  <FormLabel>Regions</FormLabel>
-                  <div className="flex flex-wrap gap-2 p-2 rounded-md border min-h-10">
-                      {selectedRegions.length > 0 ? selectedRegions.map(r => <Badge key={r.id}>{r.name}</Badge>) : <p className="text-sm text-muted-foreground">Select regions from the map</p>}
-                  </div>
-              </div>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-1 space-y-6">
+                    {/* Region Display */}
+                    <div className="space-y-2">
+                        <FormLabel>Regions</FormLabel>
+                        <div className="flex flex-wrap gap-2 p-2 rounded-md border min-h-10">
+                            {selectedRegions.length > 0 ? selectedRegions.map(r => <Badge key={r.id}>{r.name}</Badge>) : <p className="text-sm text-muted-foreground">Select regions from the map</p>}
+                        </div>
+                    </div>
 
-              {/* Event Type Input */}
-              <FormField
-                control={form.control}
-                name="eventType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Event Type</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Heavy Rainfall" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                    {/* Event Type Input */}
+                    <FormField
+                    control={form.control}
+                    name="eventType"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Event Type</FormLabel>
+                        <FormControl>
+                            <Input placeholder="e.g. Heavy Rainfall" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
 
-              {/* Severity Selector */}
-              <FormField
-                control={form.control}
-                name="severity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Severity</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select severity" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="yellow">Yellow</SelectItem>
-                        <SelectItem value="orange">Orange</SelectItem>
-                        <SelectItem value="red">Red</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              {/* Date Pickers */}
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="pushDateTime"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Push Date</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button variant={'outline'} className={cn('justify-start text-left font-normal', !field.value && 'text-muted-foreground')}>
-                              {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    {/* Severity Selector */}
+                    <FormField
+                    control={form.control}
+                    name="severity"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Severity</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select severity" />
+                            </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                            <SelectItem value="yellow">Yellow</SelectItem>
+                            <SelectItem value="orange">Orange</SelectItem>
+                            <SelectItem value="red">Red</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                </div>
+                
+                <div className="lg:col-span-1 space-y-6">
+                    {/* Date Pickers */}
+                    <div className="flex flex-col gap-6">
+                        <FormField
+                        control={form.control}
+                        name="pushDateTime"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-col">
+                            <FormLabel>Push Date</FormLabel>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                <FormControl>
+                                    <Button variant={'outline'} className={cn('justify-start text-left font-normal', !field.value && 'text-muted-foreground')}>
+                                    {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                                </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                        <FormField
+                        control={form.control}
+                        name="eventDateFrom"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-col">
+                            <FormLabel>Event Start Date</FormLabel>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                <FormControl>
+                                    <Button variant={'outline'} className={cn('justify-start text-left font-normal', !field.value && 'text-muted-foreground')}>
+                                    {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                                </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                        />
+                    </div>
+                     {/* Justification Textarea with AI Suggestion */}
+                    <FormField
+                        control={form.control}
+                        name="justification"
+                        render={({ field }) => (
+                        <FormItem>
+                            <div className="flex items-center justify-between">
+                            <FormLabel>Justification</FormLabel>
+                            <Button type="button" variant="outline" size="sm" onClick={handleSuggestJustification} disabled={isSuggesting}>
+                                <Sparkles className={cn("mr-2 h-4 w-4", isSuggesting && "animate-spin")} />
+                                Suggest
                             </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
+                            </div>
+                            <FormControl>
+                            <Textarea placeholder="Explain the rationale for this alert..." rows={5} {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                </div>
+                
+                <div className="lg:col-span-1 space-y-6">
+                    {/* Image Upload */}
+                    <FormItem>
+                        <FormLabel>Image (Optional)</FormLabel>
+                        {/* @backend-note Image upload functionality is currently a placeholder.
+                            This needs to be connected to a file storage service (e.g., Firebase Storage)
+                            and the `imageUrl` field in the form should be updated with the uploaded image's URL. */}
+                        <FormControl>
+                            <div className="flex items-center gap-4">
+                                {form.watch('imageUrl') && <Image src={form.watch('imageUrl')!} alt="Justification" width={64} height={64} className="rounded-md object-cover" data-ai-hint="forecast map"/>}
+                                <Button type="button" variant="outline">
+                                    <Upload className="mr-2 h-4 w-4" />
+                                    Upload Image
+                                </Button>
+                            </div>
+                        </FormControl>
                     </FormItem>
-                  )}
-                />
-                 <FormField
-                  control={form.control}
-                  name="eventDateFrom"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Event Start Date</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button variant={'outline'} className={cn('justify-start text-left font-normal', !field.value && 'text-muted-foreground')}>
-                              {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              
-              {/* Justification Textarea with AI Suggestion */}
-              <FormField
-                control={form.control}
-                name="justification"
-                render={({ field }) => (
-                  <FormItem>
-                     <div className="flex items-center justify-between">
-                       <FormLabel>Justification</FormLabel>
-                       <Button type="button" variant="outline" size="sm" onClick={handleSuggestJustification} disabled={isSuggesting}>
-                         <Sparkles className={cn("mr-2 h-4 w-4", isSuggesting && "animate-spin")} />
-                         Suggest
-                       </Button>
-                     </div>
-                    <FormControl>
-                      <Textarea placeholder="Explain the rationale for this alert..." rows={5} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Image Upload */}
-              <FormItem>
-                  <FormLabel>Image (Optional)</FormLabel>
-                   {/* @backend-note Image upload functionality is currently a placeholder.
-                       This needs to be connected to a file storage service (e.g., Firebase Storage)
-                       and the `imageUrl` field in the form should be updated with the uploaded image's URL. */}
-                  <FormControl>
-                      <div className="flex items-center gap-4">
-                          {form.watch('imageUrl') && <Image src={form.watch('imageUrl')!} alt="Justification" width={64} height={64} className="rounded-md object-cover" data-ai-hint="forecast map"/>}
-                          <Button type="button" variant="outline">
-                              <Upload className="mr-2 h-4 w-4" />
-                              Upload Image
-                          </Button>
-                      </div>
-                  </FormControl>
-              </FormItem>
-              
-              {/* Form Actions */}
-              <CardFooter className="flex-col !p-0 gap-2 !pt-0">
-                  <Button type="submit" className="w-full" disabled={selectedRegions.length === 0}>{alert?.status === 'draft' ? 'Save and Push' : 'Save Draft'}</Button>
-                   {alert?.status === 'active' && <Button type="submit" className="w-full">Update and Notify</Button>}
-                  <div className="flex w-full gap-2">
-                      <Button type="button" variant="outline" className="w-full" onClick={onCancel}>Cancel</Button>
-                      {alert && <Button type="button" variant="destructive" className="w-full" onClick={() => onDelete(alert.id)}><Trash2 className="mr-2 h-4 w-4"/> Delete</Button>}
-                  </div>
-              </CardFooter>
-            </form>
-          </Form>
-        </CardContent>
-      </div>
+                     {/* Form Actions */}
+                    <div className="flex flex-col gap-2 pt-6">
+                        <Button type="submit" className="w-full" disabled={selectedRegions.length === 0}>{alert?.status === 'draft' ? 'Save and Push' : 'Save Draft'}</Button>
+                        {alert?.status === 'active' && <Button type="submit" className="w-full">Update and Notify</Button>}
+                        <div className="flex w-full gap-2">
+                            <Button type="button" variant="outline" className="w-full" onClick={onCancel}>Cancel</Button>
+                            {alert && <Button type="button" variant="destructive" className="w-full" onClick={() => onDelete(alert.id)}><Trash2 className="mr-2 h-4 w-4"/> Delete</Button>}
+                        </div>
+                    </div>
+                </div>
+            </div>
+          </form>
+        </Form>
+      </CardContent>
     </Card>
   );
 }

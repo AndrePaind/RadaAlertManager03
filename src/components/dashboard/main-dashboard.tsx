@@ -1,3 +1,4 @@
+
 'use client';
 /**
  * @file This is the main component for the dashboard. It acts as the central hub,
@@ -19,6 +20,7 @@ import { MapView } from './map-view';
 import { StatsPanel } from './stats-panel';
 import { AlertForm } from './alert-form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card } from '../ui/card';
 
 export function MainDashboard() {
   // STATE MANAGEMENT
@@ -196,9 +198,9 @@ export function MainDashboard() {
           </SelectContent>
         </Select>
       </div>
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 md:p-6 overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 md:p-6">
         {/* Left Column: Alerts List */}
-        <div className="lg:col-span-3 flex flex-col gap-6">
+        <div className="lg:col-span-3">
           <AlertsList
             alerts={countryAlerts}
             selectedAlert={selectedAlert}
@@ -207,45 +209,48 @@ export function MainDashboard() {
           />
         </div>
 
-        {/* Center Column: Map and Controls */}
-        <div className="lg:col-span-6 flex flex-col gap-6">
-            <StatsPanel stats={currentStats} />
-            <div className="flex-grow flex flex-col">
-              <MapView 
-                country={selectedCountry}
-                selectedRegions={selectedRegions}
-                onToggleRegion={handleToggleRegion}
-                canSelectRegions={canSelectRegions}
-              />
+        {/* Center & Right Column combined */}
+        <div className="lg:col-span-9 flex flex-col gap-6">
+          <StatsPanel stats={currentStats} />
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div className="xl:col-span-3 flex flex-col gap-6">
+               <div className="flex-grow flex flex-col">
+                <MapView 
+                  country={selectedCountry}
+                  selectedRegions={selectedRegions}
+                  onToggleRegion={handleToggleRegion}
+                  canSelectRegions={canSelectRegions}
+                />
+              </div>
+              <LayerControls />
             </div>
-            <LayerControls />
-        </div>
-
-        {/* Right Column: Alert Form or Placeholder */}
-        <div className="lg:col-span-3">
-            {showForm ? (
-              <AlertForm
-                key={selectedAlert?.id || 'new'} // Use key to force re-render on new alert
-                alert={selectedAlert}
-                country={selectedCountry}
-                selectedRegions={selectedRegions}
-                onSave={handleSaveAlert}
-                onDelete={handleDeleteAlert}
-                onCancel={() => {
-                  setSelectedAlert(null);
-                  setIsCreatingNew(false);
-                  setSelectedRegions([]);
-                }}
-              />
+            
+          </div>
+           {showForm ? (
+              <div className="xl:col-span-3">
+                <AlertForm
+                  key={selectedAlert?.id || 'new'} // Use key to force re-render on new alert
+                  alert={selectedAlert}
+                  country={selectedCountry}
+                  selectedRegions={selectedRegions}
+                  onSave={handleSaveAlert}
+                  onDelete={handleDeleteAlert}
+                  onCancel={() => {
+                    setSelectedAlert(null);
+                    setIsCreatingNew(false);
+                    setSelectedRegions([]);
+                  }}
+                />
+              </div>
             ) : (
-                <div className="flex items-center justify-center h-full bg-card rounded-lg border border-dashed">
+                <Card className="xl:col-span-3 flex items-center justify-center h-full bg-card rounded-lg border border-dashed min-h-[200px]">
                     <div className="text-center text-muted-foreground">
                         <p>Select an alert to view details</p>
                         <p className="text-sm">or create a new one.</p>
                     </div>
-                </div>
+                </Card>
             )}
-          </div>
+        </div>
       </div>
     </div>
   );
