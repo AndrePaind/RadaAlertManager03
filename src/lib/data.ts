@@ -1,5 +1,26 @@
+/**
+ * @file This file contains all the FAKE/MOCK data for the application.
+ *
+ * @backend-note
+ * In a real-world application, this data should not exist. Instead, you would fetch
+ * this information from your backend services via API calls. Each of these exports
+ * represents a potential API endpoint. For example:
+ *
+ * - `countries`: Could be fetched from a `GET /api/countries` endpoint. This might
+ *   also include the region data with their SVG paths (or ideally GeoJSON data).
+ * - `alerts`: Could be fetched from a `GET /api/alerts?countryId=...` endpoint.
+ * - `statsByRegion`, `nationalStats`: Could be fetched from a `GET /api/stats?...`
+ *   endpoint with parameters for country and regions.
+ *
+ * The backend developer's task is to create these endpoints and replace the usage
+ * of this mock data in the components (primarily in `src/components/dashboard/main-dashboard.tsx`)
+ * with `fetch` calls to the new APIs.
+ */
+
 import type { Alert, Country, ForecastProvider, Stats } from './types';
 
+// FAKE DATA: List of countries and their regions.
+// The `path` property contains SVG path data for rendering the map.
 export const countries: Country[] = [
   {
     id: 'colombia',
@@ -30,6 +51,7 @@ export const countries: Country[] = [
   },
 ];
 
+// FAKE DATA: Initial list of alerts.
 export const alerts: Alert[] = [
   {
     id: 'alert-1',
@@ -48,7 +70,7 @@ export const alerts: Alert[] = [
   {
     id: 'alert-2',
     countryId: 'colombia',
-    regionIds: ['bolivar'],
+    regionIds: ['bolivar', 'antioquia'],
     severity: 'yellow',
     eventType: 'Heatwave',
     pushDateTime: new Date('2024-08-18T12:00:00Z'),
@@ -75,6 +97,7 @@ export const alerts: Alert[] = [
   },
 ];
 
+// FAKE DATA: List of forecast providers. This could be static or come from a config API.
 export const forecastProviders: ForecastProvider[] = [
     { id: 'reality', name: 'Reality' },
     { id: 'google', name: 'Google Weather' },
@@ -82,6 +105,9 @@ export const forecastProviders: ForecastProvider[] = [
     { id: 'other', name: 'Other Provider' },
 ];
 
+// FAKE DATA: Statistical data per region.
+// This represents the number of users in each alert level (green, yellow, etc.)
+// for different forecast providers and for "reality" (actual reported status).
 export const statsByRegion: { [regionId: string]: Stats } = {
   // Colombia
   'bogota': {
@@ -152,11 +178,13 @@ export const statsByRegion: { [regionId: string]: Stats } = {
   }
 };
 
+// FAKE DATA: National-level statistics.
+// This is used as the default view when no specific regions are selected.
 export const nationalStats: { [countryId: string]: Stats } = {
     'colombia': {
-      'reality': { green: 2600000, yellow: 750000, orange: 120000, red: 9000, total: 3479000 },
-      'google': { green: 2500000, yellow: 800000, orange: 150000, red: 10000, total: 3460000 },
-      'openweather': { green: 2700000, yellow: 700000, orange: 120000, red: 8000, total: 3528000 },
+      'reality': { green: 295000, yellow: 83000, orange: 16500, red: 980, total: 395480 },
+      'google': { green: 280000, yellow: 90000, orange: 20000, red: 1200, total: 391200 },
+      'openweather': { green: 310000, yellow: 75000, orange: 16000, red: 950, total: 401950 },
     },
     'kenya': {
         'reality': { green: 160000, yellow: 45000, orange: 10000, red: 800, total: 215800 },

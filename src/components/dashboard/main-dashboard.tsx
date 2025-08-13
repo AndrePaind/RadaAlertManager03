@@ -1,7 +1,17 @@
 'use client';
+/**
+ * @file This is the main component for the dashboard. It acts as the central hub,
+ * managing the application's state and orchestrating interactions between its child components:
+ * - AlertsList: Displays and manages alerts.
+ * - AlertForm: For creating and editing alerts.
+ * - StatsPanel: Shows statistical data.
+ * - MapView: Displays the geographical map and regions.
+ * - LayerControls: Provides options to toggle map layers.
+ */
 
 import { useState, useMemo } from 'react';
 import type { Alert, Country, Region, Stats } from '@/lib/types';
+// FAKE DATA: Importing mock data. In a real application, this would be fetched from a backend API.
 import { alerts as initialAlerts, countries, statsByRegion, nationalStats } from '@/lib/data';
 import { AlertsList } from './alerts-list';
 import { LayerControls } from './layer-controls';
@@ -11,27 +21,54 @@ import { AlertForm } from './alert-form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export function MainDashboard() {
+  // STATE MANAGEMENT
+  // @backend-note All state is managed locally using `useState`. In a production environment,
+  // this state should be fetched from and persisted to a backend. For more complex scenarios,
+  // a state management library like Redux or Zustand might be considered.
+
+  // The list of all alerts. Initialized with mock data.
   const [alerts, setAlerts] = useState<Alert[]>(initialAlerts);
+  
+  // The currently selected country. Defaults to the first country in the mock data.
   const [selectedCountry, setSelectedCountry] = useState<Country>(countries[0]);
+  
+  // The list of regions selected on the map.
   const [selectedRegions, setSelectedRegions] = useState<Region[]>([]);
+  
+  // The alert currently selected from the AlertsList, or null if none is selected.
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
+  
+  // A flag to indicate if the user is in the process of creating a new alert.
   const [isCreatingNew, setIsCreatingNew] = useState(false);
 
+  // HANDLERS
+  
+  /**
+   * Handles changing the selected country.
+   * @backend-note When a country changes, data for alerts, stats, and regions
+   * for the new country should be fetched from the backend.
+   */
   const handleSelectCountry = (countryId: string) => {
     const country = countries.find(c => c.id === countryId);
     if (country) {
       setSelectedCountry(country);
+      // Reset selections when country changes.
       setSelectedRegions([]);
       setSelectedAlert(null);
       setIsCreatingNew(false);
     }
   };
 
+  /**
+   * Handles selecting an alert from the list.
+   * This populates the form with the alert's data.
+   */
   const handleSelectAlert = (alert: Alert | null) => {
     setSelectedAlert(alert);
     if (alert) {
       const country = countries.find(c => c.id === alert.countryId);
       if(country) setSelectedCountry(country);
+      // Populate selected regions based on the alert's data.
       setSelectedRegions(country?.regions.filter(r => alert.regionIds.includes(r.id)) || []);
       setIsCreatingNew(false);
     } else {
@@ -39,12 +76,19 @@ export function MainDashboard() {
     }
   };
 
+  /**
+   * Handles initiating the creation of a new alert.
+   */
   const handleNewAlert = () => {
     setIsCreatingNew(true);
     setSelectedAlert(null);
     setSelectedRegions([]);
   };
 
+  /**
+   * Handles toggling a region's selection on the map.
+   * A region can only be selected if an alert is being created or edited.
+   */
   const handleToggleRegion = (region: Region) => {
     if (isCreatingNew || selectedAlert) {
         setSelectedRegions(prev =>
@@ -55,6 +99,12 @@ export function MainDashboard() {
     }
   };
   
+  /**
+   * Handles saving a new or updated alert.
+   * @backend-note This function currently updates the local `alerts` state.
+   * This should be replaced with an API call to a backend endpoint (e.g., POST /api/alerts or PUT /api/alerts/:id)
+   * to persist the changes to the database.
+   */
   const handleSaveAlert = (alertToSave: Alert) => {
     const existing = alerts.find(a => a.id === alertToSave.id);
     if (existing) {
@@ -66,16 +116,35 @@ export function MainDashboard() {
     setIsCreatingNew(false);
   };
 
+  /**
+   * Handles deleting an alert.
+   * @backend-note This function currently filters the local `alerts` state.
+   * It should be replaced with an API call to a backend endpoint (e.g., DELETE /api/alerts/:id).
+   */
   const handleDeleteAlert = (alertId: string) => {
     setAlerts(alerts.filter(a => a.id !== alertId));
     setSelectedAlert(null);
     setIsCreatingNew(false);
   };
 
+  // MEMOIZED DERIVED STATE
+
+  /**
+   * Filters alerts to show only those for the currently selected country.
+   * @backend-note This client-side filtering should be replaced by a backend query,
+   * e.g., fetching `/api/alerts?countryId=${selectedCountry.id}`.
+   */
   const countryAlerts = useMemo(() => {
     return alerts.filter(alert => alert.countryId === selectedCountry.id);
   }, [alerts, selectedCountry]);
 
+  /**
+   * Computes the statistics to display in the StatsPanel.
+   * It shows national stats if no regions are selected, or aggregates stats for the selected regions.
+   * @backend-note This logic for aggregating stats is performed on the client.
+   * For a real application, the backend should provide an endpoint that can return
+   * aggregated stats for a given set of regions (e.g., /api/stats?regionIds=...&countryId=...).
+   */
   const currentStats = useMemo(() => {
     if (!nationalStats[selectedCountry.id]) {
       return null;
@@ -108,12 +177,13 @@ export function MainDashboard() {
     return aggregated;
   }, [selectedRegions, selectedCountry.id]);
   
+  // Conditional rendering flags
   const showForm = isCreatingNew || selectedAlert;
   const canSelectRegions = isCreatingNew || selectedAlert;
 
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-screen">
       <div className="p-4 md:px-6 border-b">
         <Select value={selectedCountry.id} onValueChange={handleSelectCountry}>
           <SelectTrigger className="w-[200px]">
@@ -126,7 +196,8 @@ export function MainDashboard() {
           </SelectContent>
         </Select>
       </div>
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 md:p-6 h-[calc(100vh-140px)]">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 md:p-6 overflow-hidden">
+        {/* Left Column: Alerts List */}
         <div className="lg:col-span-3 flex flex-col gap-6">
           <AlertsList
             alerts={countryAlerts}
@@ -136,21 +207,25 @@ export function MainDashboard() {
           />
         </div>
 
-        <div className="lg:col-span-9 grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <div className="xl:col-span-2 flex flex-col gap-6">
+        {/* Center Column: Map and Controls */}
+        <div className="lg:col-span-6 flex flex-col gap-6">
             <StatsPanel stats={currentStats} />
-            <MapView 
-              country={selectedCountry}
-              selectedRegions={selectedRegions}
-              onToggleRegion={handleToggleRegion}
-              canSelectRegions={canSelectRegions}
-            />
+            <div className="flex-grow flex flex-col">
+              <MapView 
+                country={selectedCountry}
+                selectedRegions={selectedRegions}
+                onToggleRegion={handleToggleRegion}
+                canSelectRegions={canSelectRegions}
+              />
+            </div>
             <LayerControls />
-          </div>
-          <div className="xl:col-span-1">
+        </div>
+
+        {/* Right Column: Alert Form or Placeholder */}
+        <div className="lg:col-span-3">
             {showForm ? (
               <AlertForm
-                key={selectedAlert?.id || 'new'}
+                key={selectedAlert?.id || 'new'} // Use key to force re-render on new alert
                 alert={selectedAlert}
                 country={selectedCountry}
                 selectedRegions={selectedRegions}
@@ -171,7 +246,6 @@ export function MainDashboard() {
                 </div>
             )}
           </div>
-        </div>
       </div>
     </div>
   );

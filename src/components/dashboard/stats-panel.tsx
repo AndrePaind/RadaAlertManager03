@@ -1,14 +1,22 @@
 'use client';
+/**
+ * @fileoverview This component displays a statistical summary, comparing "Reality"
+ * (actual user status) with forecasts from various providers.
+ */
 
 import type { Stats } from '@/lib/types';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+// FAKE DATA: Importing mock forecast provider metadata.
 import { forecastProviders } from '@/lib/data';
 import { Separator } from '../ui/separator';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 interface StatsPanelProps {
-  stats: Stats | null;
+  stats: Stats | null; // The statistical data to display. Can be national or aggregated for selected regions.
 }
 
+/**
+ * A small card component to display a single statistic (e.g., number of users in 'Green').
+ */
 const StatCard = ({ title, value, colorClass }: { title: string, value: number, colorClass: string }) => (
     <div className="flex flex-col items-center p-2 rounded-lg bg-card flex-1">
         <p className={`text-sm font-medium ${colorClass}`}>{title}</p>
@@ -17,6 +25,12 @@ const StatCard = ({ title, value, colorClass }: { title: string, value: number, 
 )
 
 export function StatsPanel({ stats }: StatsPanelProps) {
+
+  // @backend-note The stats data is passed as a prop from MainDashboard.
+  // This data is derived from the mock data in `src/lib/data.ts`.
+  // In a real application, this data would be fetched from a backend API.
+  // The 'reality' stats would likely come from a separate source (e.g., user reports)
+  // compared to forecast providers.
 
   const realityStats = stats?.['reality'];
   const otherProviders = forecastProviders.filter(p => p.id !== 'reality');
@@ -29,11 +43,13 @@ export function StatsPanel({ stats }: StatsPanelProps) {
       </CardHeader>
       <CardContent>
         {!stats ? (
+           // Display a message if no stats are available for the current selection.
            <div className="flex items-center justify-center h-24">
             <p className="text-muted-foreground">No statistical data available for this selection.</p>
           </div>
         ) : (
         <div className="space-y-4">
+            {/* "Reality" Section */}
             {realityStats && (
                  <div>
                     <h4 className="text-sm font-semibold mb-2">Reality</h4>
@@ -52,6 +68,7 @@ export function StatsPanel({ stats }: StatsPanelProps) {
             
             <Separator />
             
+            {/* "Forecasts" Section */}
             <div className='space-y-4'>
                 <h4 className="text-sm font-semibold">Forecasts</h4>
                 {otherProviders.map((provider) => {

@@ -1,4 +1,9 @@
 'use client';
+/**
+ * @fileoverview This component renders a form for creating or editing an alert.
+ * It uses `react-hook-form` for form state management and `zod` for validation.
+ * It also includes a feature to suggest an alert justification using an AI model.
+ */
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -35,6 +40,7 @@ import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import { ScrollArea } from '../ui/scroll-area';
 
+// Defines the schema for the alert form using Zod for validation.
 const alertFormSchema = z.object({
   eventType: z.string().min(2, { message: 'Event type must be at least 2 characters.' }),
   severity: z.enum(['yellow', 'orange', 'red']),
@@ -48,20 +54,22 @@ const alertFormSchema = z.object({
 type AlertFormValues = z.infer<typeof alertFormSchema>;
 
 interface AlertFormProps {
-  alert: Alert | null;
-  country: Country;
-  selectedRegions: Region[];
-  onSave: (alert: Alert) => void;
-  onDelete: (alertId: string) => void;
-  onCancel: () => void;
+  alert: Alert | null; // The alert to edit, or null if creating a new one.
+  country: Country; // The currently selected country.
+  selectedRegions: Region[]; // The regions selected on the map for this alert.
+  onSave: (alert: Alert) => void; // Callback function when the alert is saved.
+  onDelete: (alertId: string) => void; // Callback function when the alert is deleted.
+  onCancel: () => void; // Callback function to cancel the editing/creation process.
 }
 
 export function AlertForm({ alert, country, selectedRegions, onSave, onDelete, onCancel }: AlertFormProps) {
   const { toast } = useToast();
-  const [isSuggesting, setIsSuggesting] = useState(false);
+  const [isSuggesting, setIsSuggesting] = useState(false); // State to manage the loading status of the AI suggestion.
 
+  // Initialize the form with react-hook-form.
   const form = useForm<AlertFormValues>({
     resolver: zodResolver(alertFormSchema),
+    // Set default values based on the passed alert prop or empty for a new alert.
     defaultValues: {
       eventType: alert?.eventType || '',
       severity: alert?.severity || 'yellow',
@@ -73,6 +81,7 @@ export function AlertForm({ alert, country, selectedRegions, onSave, onDelete, o
     },
   });
 
+  // Effect to reset the form whenever the selected alert changes.
   useEffect(() => {
     form.reset({
       eventType: alert?.eventType || '',
@@ -85,6 +94,13 @@ export function AlertForm({ alert, country, selectedRegions, onSave, onDelete, o
     });
   }, [alert, form]);
 
+  /**
+   * Handles the AI-powered justification suggestion.
+   * It calls a server action which in turn calls a Genkit flow.
+   * @backend-note This is where the frontend calls the AI backend. The `ensembleForecasts`
+   * is currently mocked. This should be replaced with real forecast data to provide
+   * more accurate and relevant suggestions.
+   */
   const handleSuggestJustification = async () => {
     setIsSuggesting(true);
     const formData = form.getValues();
@@ -99,7 +115,8 @@ export function AlertForm({ alert, country, selectedRegions, onSave, onDelete, o
         eventDate: formData.eventDateFrom.toISOString(),
         eventType: formData.eventType,
         severity: formData.severity as Severity,
-        ensembleForecasts: 'Sample forecast data for suggestion.', // This would be dynamic
+        // FAKE DATA: This should be replaced with actual forecast data.
+        ensembleForecasts: 'Sample forecast data for suggestion.', 
       });
 
       if (result.success && result.justification) {
@@ -114,6 +131,12 @@ export function AlertForm({ alert, country, selectedRegions, onSave, onDelete, o
     setIsSuggesting(false);
   };
   
+  /**
+   * Handles the form submission.
+   * It constructs a new alert object and calls the onSave prop.
+   * @backend-note The `onSave` function currently updates the local state in `MainDashboard`.
+   * This should be replaced with an API call to the backend to persist the alert data.
+   */
   function onSubmit(data: AlertFormValues) {
     if (selectedRegions.length === 0) {
       toast({
@@ -125,6 +148,7 @@ export function AlertForm({ alert, country, selectedRegions, onSave, onDelete, o
     }
 
     const newAlert: Alert = {
+      // FAKE DATA: A temporary ID is generated. The backend should generate a proper unique ID.
       id: alert?.id || `alert-${Date.now()}`,
       countryId: country.id,
       regionIds: selectedRegions.map(r => r.id),
@@ -135,6 +159,7 @@ export function AlertForm({ alert, country, selectedRegions, onSave, onDelete, o
       justification: data.justification,
       imageUrl: data.imageUrl,
       status: alert?.status || 'draft',
+      // FAKE DATA: Author should come from the authenticated user's session.
       author: 'MeteOps Lead',
       lastUpdated: new Date(),
       version: (alert?.version || 0) + 1,
@@ -150,10 +175,11 @@ export function AlertForm({ alert, country, selectedRegions, onSave, onDelete, o
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <ScrollArea className="flex-grow">
+      <div className="flex-grow overflow-y-auto">
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {/* Region Display */}
               <div className="space-y-2">
                   <FormLabel>Regions</FormLabel>
                   <div className="flex flex-wrap gap-2 p-2 rounded-md border min-h-10">
@@ -161,6 +187,7 @@ export function AlertForm({ alert, country, selectedRegions, onSave, onDelete, o
                   </div>
               </div>
 
+              {/* Event Type Input */}
               <FormField
                 control={form.control}
                 name="eventType"
@@ -175,6 +202,7 @@ export function AlertForm({ alert, country, selectedRegions, onSave, onDelete, o
                 )}
               />
 
+              {/* Severity Selector */}
               <FormField
                 control={form.control}
                 name="severity"
@@ -197,7 +225,8 @@ export function AlertForm({ alert, country, selectedRegions, onSave, onDelete, o
                   </FormItem>
                 )}
               />
-
+              
+              {/* Date Pickers */}
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -246,7 +275,8 @@ export function AlertForm({ alert, country, selectedRegions, onSave, onDelete, o
                   )}
                 />
               </div>
-
+              
+              {/* Justification Textarea with AI Suggestion */}
               <FormField
                 control={form.control}
                 name="justification"
@@ -267,8 +297,12 @@ export function AlertForm({ alert, country, selectedRegions, onSave, onDelete, o
                 )}
               />
 
+              {/* Image Upload */}
               <FormItem>
                   <FormLabel>Image (Optional)</FormLabel>
+                   {/* @backend-note Image upload functionality is currently a placeholder.
+                       This needs to be connected to a file storage service (e.g., Firebase Storage)
+                       and the `imageUrl` field in the form should be updated with the uploaded image's URL. */}
                   <FormControl>
                       <div className="flex items-center gap-4">
                           {form.watch('imageUrl') && <Image src={form.watch('imageUrl')!} alt="Justification" width={64} height={64} className="rounded-md object-cover" data-ai-hint="forecast map"/>}
@@ -279,7 +313,8 @@ export function AlertForm({ alert, country, selectedRegions, onSave, onDelete, o
                       </div>
                   </FormControl>
               </FormItem>
-
+              
+              {/* Form Actions */}
               <CardFooter className="flex-col !p-0 gap-2 !pt-0">
                   <Button type="submit" className="w-full" disabled={selectedRegions.length === 0}>{alert?.status === 'draft' ? 'Save and Push' : 'Save Draft'}</Button>
                    {alert?.status === 'active' && <Button type="submit" className="w-full">Update and Notify</Button>}
@@ -291,7 +326,7 @@ export function AlertForm({ alert, country, selectedRegions, onSave, onDelete, o
             </form>
           </Form>
         </CardContent>
-      </ScrollArea>
+      </div>
     </Card>
   );
 }

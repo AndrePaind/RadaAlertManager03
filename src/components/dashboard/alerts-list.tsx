@@ -1,4 +1,8 @@
 'use client';
+/**
+ * @fileoverview This component displays a list of alerts, categorized by status (Draft, Active, Expired).
+ * It allows users to select an alert to view its details or to create a new alert.
+ */
 
 import type { Alert } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,14 +14,20 @@ import { PlusCircle } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 
 interface AlertsListProps {
-  alerts: Alert[];
-  selectedAlert: Alert | null;
-  onSelectAlert: (alert: Alert) => void;
-  onNewAlert: () => void;
+  alerts: Alert[]; // The list of all alerts for the selected country.
+  selectedAlert: Alert | null; // The currently selected alert.
+  onSelectAlert: (alert: Alert) => void; // Callback function when an alert is selected.
+  onNewAlert: () => void; // Callback function to initiate creating a new alert.
 }
 
 export function AlertsList({ alerts, selectedAlert, onSelectAlert, onNewAlert }: AlertsListProps) {
+  
+  /**
+   * Renders a single alert card.
+   * @param alert The alert object to render.
+   */
   const renderAlert = (alert: Alert) => {
+    // Map severity levels to specific CSS classes for color-coding.
     const severityMap: { [key in Alert['severity']]: string } = {
       yellow: 'bg-yellow-400 hover:bg-yellow-400/90',
       orange: 'bg-orange-500 hover:bg-orange-500/90',
@@ -29,7 +39,7 @@ export function AlertsList({ alerts, selectedAlert, onSelectAlert, onNewAlert }:
         key={alert.id}
         className={cn(
           'cursor-pointer transition-all hover:shadow-md',
-          selectedAlert?.id === alert.id && 'ring-2 ring-primary'
+          selectedAlert?.id === alert.id && 'ring-2 ring-primary' // Highlight the selected alert.
         )}
         onClick={() => onSelectAlert(alert)}
       >
@@ -47,6 +57,9 @@ export function AlertsList({ alerts, selectedAlert, onSelectAlert, onNewAlert }:
     );
   };
 
+  // Filter alerts into different status categories.
+  // @backend-note The filtering is done on the client side. For performance with large datasets,
+  // this should be handled by the backend through API query parameters (e.g., /api/alerts?status=draft).
   const drafts = alerts.filter(a => a.status === 'draft');
   const active = alerts.filter(a => a.status === 'active');
   const expired = alerts.filter(a => a.status === 'expired');
@@ -60,14 +73,16 @@ export function AlertsList({ alerts, selectedAlert, onSelectAlert, onNewAlert }:
           New Alert
         </Button>
       </CardHeader>
-      <CardContent className="flex flex-col flex-grow">
+      <CardContent className="flex flex-col flex-grow p-0">
         <Tabs defaultValue="drafts" className="flex flex-col flex-grow">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="drafts">Drafts</TabsTrigger>
-            <TabsTrigger value="active">Active</TabsTrigger>
-            <TabsTrigger value="expired">Expired</TabsTrigger>
-          </TabsList>
-          <ScrollArea className="flex-grow mt-4">
+          <div className="p-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="drafts">Drafts</TabsTrigger>
+              <TabsTrigger value="active">Active</TabsTrigger>
+              <TabsTrigger value="expired">Expired</TabsTrigger>
+            </TabsList>
+          </div>
+          <div className="flex-grow overflow-y-auto px-6">
             <div className="space-y-3 p-1">
               <TabsContent value="drafts" className="mt-0">
                 {drafts.length > 0 ? drafts.map(renderAlert) : <p className="text-center text-sm text-muted-foreground py-4">No draft alerts.</p>}
@@ -79,7 +94,7 @@ export function AlertsList({ alerts, selectedAlert, onSelectAlert, onNewAlert }:
                 {expired.length > 0 ? expired.map(renderAlert) : <p className="text-center text-sm text-muted-foreground py-4">No expired alerts.</p>}
               </TabsContent>
             </div>
-          </ScrollArea>
+          </div>
         </Tabs>
       </CardContent>
     </Card>
