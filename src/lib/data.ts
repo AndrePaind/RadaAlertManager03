@@ -26,27 +26,27 @@ export const countries: Country[] = [
     id: 'colombia',
     name: 'Colombia',
     regions: [
-      { id: 'bogota', name: 'Bogotá D.C.', path: 'M198 153 L210 150 L215 162 L202 165 Z' },
-      { id: 'antioquia', name: 'Antioquia', path: 'M145 78 L185 70 L190 125 L150 135 Z' },
-      { id: 'valle-del-cauca', name: 'Valle del Cauca', path: 'M130 185 L160 175 L165 215 L135 225 Z' },
-      { id: 'santander', name: 'Santander', path: 'M215 100 L255 90 L260 140 L220 150 Z' },
-      { id: 'bolivar', name: 'Bolívar', path: 'M195 40 L245 30 L250 80 L200 90 Z' },
-      { id: 'amazonas', name: 'Amazonas', path: 'M260 250 L360 240 L370 290 L270 295 Z' },
-      { id: 'cundinamarca', name: 'Cundinamarca', path: 'M190 128 L225 125 L230 168 L195 170 Z' },
-      { id: 'boyaca', name: 'Boyacá', path: 'M220 85 L260 80 L265 128 L225 135 Z' },
-      { id: 'narino', name: 'Nariño', path: 'M105 235 L135 225 L145 265 L115 275 Z' },
-      { id: 'magdalena', name: 'Magdalena', path: 'M205 20 L255 15 L260 65 L210 70 Z' },
+      { id: 'bogota', name: 'Bogotá D.C.', path: 'M10 10 L82 10 L82 140 L10 140 Z' },
+      { id: 'antioquia', name: 'Antioquia', path: 'M92 10 L164 10 L164 140 L92 140 Z' },
+      { id: 'valle-del-cauca', name: 'Valle del Cauca', path: 'M174 10 L246 10 L246 140 L174 140 Z' },
+      { id: 'santander', name: 'Santander', path: 'M256 10 L328 10 L328 140 L256 140 Z' },
+      { id: 'bolivar', name: 'Bolívar', path: 'M338 10 L410 10 L410 140 L338 140 Z' },
+      { id: 'amazonas', name: 'Amazonas', path: 'M10 150 L82 150 L82 280 L10 280 Z' },
+      { id: 'cundinamarca', name: 'Cundinamarca', path: 'M92 150 L164 150 L164 280 L92 280 Z' },
+      { id: 'boyaca', name: 'Boyacá', path: 'M174 150 L246 150 L246 280 L174 280 Z' },
+      { id: 'narino', name: 'Nariño', path: 'M256 150 L328 150 L328 280 L256 280 Z' },
+      { id: 'magdalena', name: 'Magdalena', path: 'M338 150 L410 150 L410 280 L338 280 Z' },
     ]
   },
   {
     id: 'kenya',
     name: 'Kenya',
     regions: [
-      { id: 'nairobi', name: 'Nairobi', path: 'M100 100 L120 110 L110 130 L90 120 Z' },
-      { id: 'mombasa', name: 'Mombasa', path: 'M150 150 L170 160 L160 180 L140 170 Z' },
-      { id: 'kisumu', name: 'Kisumu', path: 'M50 80 L70 90 L60 110 L40 100 Z' },
-      { id: 'nakuru', name: 'Nakuru', path: 'M80 50 L100 60 L90 80 L70 70 Z' },
-      { id: 'rift-valley', name: 'Rift Valley', path: 'M30 20 L130 25 L125 90 L25 85 Z' }
+      { id: 'nairobi', name: 'Nairobi', path: 'M10 10 L82 10 L82 140 L10 140 Z' },
+      { id: 'mombasa', name: 'Mombasa', path: 'M92 10 L164 10 L164 140 L92 140 Z' },
+      { id: 'kisumu', name: 'Kisumu', path: 'M174 10 L246 10 L246 140 L174 140 Z' },
+      { id: 'nakuru', name: 'Nakuru', path: 'M256 10 L328 10 L328 140 L256 140 Z' },
+      { id: 'rift-valley', name: 'Rift Valley', path: 'M338 10 L410 10 L410 140 L338 140 Z' }
     ],
   },
 ];

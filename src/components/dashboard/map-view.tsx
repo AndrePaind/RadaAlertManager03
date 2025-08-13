@@ -1,3 +1,4 @@
+
 'use client';
 /**
  * @fileoverview This component renders the main map view, displaying country regions.
@@ -12,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Calendar } from '../ui/calendar';
 import { Button } from '../ui/button';
 import { CalendarIcon, Play } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 
 interface MapViewProps {
@@ -22,11 +23,32 @@ interface MapViewProps {
   canSelectRegions: boolean; // Controls whether regions can be selected.
 }
 
+interface RegionWithCenter extends Region {
+    centerX: number;
+    centerY: number;
+}
+
 export function MapView({ country, selectedRegions, onToggleRegion, canSelectRegions }: MapViewProps) {
     // State for the date picker in the map header.
     const [date, setDate] = useState<Date>(new Date());
+    const [regionsWithCenters, setRegionsWithCenters] = useState<RegionWithCenter[]>([]);
 
-    const countryRegions = country.regions;
+    useEffect(() => {
+        // This code runs only on the client, after the component has mounted.
+        // This avoids the "document is not defined" error during server-side rendering.
+        const calculatedRegions = country.regions.map(region => {
+            const pathElement = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            pathElement.setAttribute("d", region.path);
+            const bbox = pathElement.getBBox();
+            return {
+                ...region,
+                centerX: bbox.x + bbox.width / 2,
+                centerY: bbox.y + bbox.height / 2,
+            };
+        });
+        setRegionsWithCenters(calculatedRegions);
+    }, [country.regions]);
+
 
   return (
     <Card className="flex-1 flex flex-col">
@@ -71,10 +93,11 @@ export function MapView({ country, selectedRegions, onToggleRegion, canSelectReg
         {/* @backend-note For a dynamic application, the GeoJSON or SVG path data for regions
             should be fetched from a backend service, especially if new countries or regions are added. */}
         <div className="w-full h-full rounded-lg bg-white dark:bg-gray-800 overflow-hidden relative" data-ai-hint="country map">
-          <svg viewBox="0 0 400 300" className="w-full h-full">
+          <svg viewBox="0 0 420 290" className="w-full h-full">
             <rect width="100%" height="100%" fill="currentColor" className="text-white dark:text-gray-800" />
-            {countryRegions.map((region) => {
+            {regionsWithCenters.map((region) => {
               const isSelected = selectedRegions.some(sr => sr.id === region.id);
+              
               return (
                 <g key={region.id} onClick={() => canSelectRegions && onToggleRegion(region)} className={cn("group", canSelectRegions && "cursor-pointer")}>
                   <path
@@ -86,7 +109,7 @@ export function MapView({ country, selectedRegions, onToggleRegion, canSelectReg
                     )}
                   />
                   {/* Tooltip-like text on hover */}
-                  <text x={10} y={280} fontSize="10" fill="black" className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                  <text x={region.centerX} y={region.centerY} textAnchor="middle" dominantBaseline="middle" fontSize="10" fill="black" className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
                     {region.name}
                   </text>
                 </g>
