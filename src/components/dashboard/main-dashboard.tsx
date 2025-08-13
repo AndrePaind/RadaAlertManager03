@@ -1,4 +1,3 @@
-
 'use client';
 /**
  * @file This is the main component for the dashboard. It acts as the central hub,
@@ -13,13 +12,24 @@
 import { useState, useMemo } from 'react';
 import type { Alert, Country, Region, Severity, Stats } from '@/lib/types';
 // FAKE DATA: Importing mock data. In a real application, this would be fetched from a backend API.
-import { alerts as initialAlerts, countries, statsByRegionForDate, nationalStatsForDate } from '@/lib/data';
+import {
+  alerts as initialAlerts,
+  countries,
+  statsByRegionForDate,
+  nationalStatsForDate,
+} from '@/lib/data';
 import { AlertsList } from './alerts-list';
 import { LayerControls } from './layer-controls';
 import { MapView } from './map-view';
 import { StatsPanel } from './stats-panel';
 import { AlertForm } from './alert-form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Card } from '../ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -33,29 +43,28 @@ export function MainDashboard() {
 
   // The list of all alerts. Initialized with mock data.
   const [alerts, setAlerts] = useState<Alert[]>(initialAlerts);
-  
+
   // The currently selected country. Defaults to the first country in the mock data.
   const [selectedCountry, setSelectedCountry] = useState<Country>(countries[0]);
-  
+
   // The list of regions selected on the map.
   const [selectedRegions, setSelectedRegions] = useState<Region[]>([]);
-  
+
   // The alert currently selected from the AlertsList, or null if none is selected.
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
-  
+
   // A flag to indicate if the user is in the process of creating a new alert.
   const [isCreatingNew, setIsCreatingNew] = useState(false);
 
   // The currently selected date for viewing forecasts and alerts.
   const [currentDate, setCurrentDate] = useState(new Date());
 
-
   // HANDLERS
 
   const handleDateChange = (days: number) => {
     setCurrentDate(prevDate => addDays(prevDate, days));
   };
-  
+
   /**
    * Handles changing the selected country.
    * @backend-note When a country changes, data for alerts, stats, and regions
@@ -80,9 +89,11 @@ export function MainDashboard() {
     setSelectedAlert(alert);
     if (alert) {
       const country = countries.find(c => c.id === alert.countryId);
-      if(country) setSelectedCountry(country);
+      if (country) setSelectedCountry(country);
       // Populate selected regions based on the alert's data.
-      setSelectedRegions(country?.regions.filter(r => alert.regionIds.includes(r.id)) || []);
+      setSelectedRegions(
+        country?.regions.filter(r => alert.regionIds.includes(r.id)) || []
+      );
       setIsCreatingNew(false);
     } else {
       setSelectedRegions([]);
@@ -104,14 +115,14 @@ export function MainDashboard() {
    */
   const handleToggleRegion = (region: Region) => {
     if (isCreatingNew || selectedAlert) {
-        setSelectedRegions(prev =>
-          prev.find(r => r.id === region.id)
-            ? prev.filter(r => r.id !== region.id)
-            : [...prev, region]
-        );
+      setSelectedRegions(prev =>
+        prev.find(r => r.id === region.id)
+          ? prev.filter(r => r.id !== region.id)
+          : [...prev, region]
+      );
     }
   };
-  
+
   /**
    * Handles saving a new or updated alert.
    * @backend-note This function currently updates the local `alerts` state.
@@ -121,7 +132,7 @@ export function MainDashboard() {
   const handleSaveAlert = (alertToSave: Alert) => {
     const existing = alerts.find(a => a.id === alertToSave.id);
     if (existing) {
-      setAlerts(alerts.map(a => a.id === alertToSave.id ? alertToSave : a));
+      setAlerts(alerts.map(a => (a.id === alertToSave.id ? alertToSave : a)));
     } else {
       setAlerts([...alerts, alertToSave]);
     }
@@ -157,10 +168,12 @@ export function MainDashboard() {
   const activeAlertsOnDate = useMemo(() => {
     return countryAlerts.filter(alert => {
       const from = startOfDay(new Date(alert.eventDates.from));
-      const to = alert.eventDates.to ? startOfDay(new Date(alert.eventDates.to)) : from;
+      const to = alert.eventDates.to
+        ? startOfDay(new Date(alert.eventDates.to))
+        : from;
       const checkDate = startOfDay(currentDate);
       return checkDate >= from && checkDate <= to;
-    })
+    });
   }, [countryAlerts, currentDate]);
 
   /**
@@ -169,11 +182,15 @@ export function MainDashboard() {
   const regionSeverities = useMemo(() => {
     const severities = new Map<string, Severity>();
     const severityOrder: Severity[] = ['yellow', 'orange', 'red'];
-    
+
     for (const alert of activeAlertsOnDate) {
       for (const regionId of alert.regionIds) {
         const currentSeverity = severities.get(regionId);
-        if (!currentSeverity || severityOrder.indexOf(alert.severity) > severityOrder.indexOf(currentSeverity)) {
+        if (
+          !currentSeverity ||
+          severityOrder.indexOf(alert.severity) >
+            severityOrder.indexOf(currentSeverity)
+        ) {
           severities.set(regionId, alert.severity);
         }
       }
@@ -190,43 +207,46 @@ export function MainDashboard() {
    */
   const currentStats = useMemo(() => {
     const dateKey = format(currentDate, 'yyyy-MM-dd');
-    const countryNationalStats = nationalStatsForDate(dateKey)[selectedCountry.id];
+    const countryNationalStats = nationalStatsForDate(dateKey)[
+      selectedCountry.id
+    ];
     const statsByRegion = statsByRegionForDate(dateKey);
 
     if (!countryNationalStats) {
       return null;
     }
-    
+
     if (selectedRegions.length === 0) {
       return countryNationalStats;
     }
-    
+
     // Aggregate stats for selected regions
     const aggregated: Stats = {};
     const providers = Object.keys(countryNationalStats);
     for (const provider of providers) {
-        aggregated[provider] = { green: 0, yellow: 0, orange: 0, red: 0, total: 0 };
+      aggregated[provider] = { green: 0, yellow: 0, orange: 0, red: 0, total: 0 };
     }
 
     for (const region of selectedRegions) {
-        const regionStats = statsByRegion[region.id];
-        if(regionStats) {
-            for (const provider of providers) {
-                if (aggregated[provider] && regionStats[provider]) {
-                    for (const level of Object.keys(regionStats[provider])) {
-                        (aggregated[provider] as any)[level] += (regionStats[provider] as any)[level];
-                    }
-                }
+      const regionStats = statsByRegion[region.id];
+      if (regionStats) {
+        for (const provider of providers) {
+          if (aggregated[provider] && regionStats[provider]) {
+            for (const level of Object.keys(regionStats[provider])) {
+              (aggregated[provider] as any)[level] += (regionStats[provider] as any)[
+                level
+              ];
             }
+          }
         }
+      }
     }
     return aggregated;
   }, [selectedRegions, selectedCountry.id, currentDate]);
-  
+
   // Conditional rendering flags
   const showForm = isCreatingNew || selectedAlert;
   const canSelectRegions = isCreatingNew || selectedAlert;
-
 
   return (
     <div className="flex flex-col h-screen">
@@ -237,24 +257,38 @@ export function MainDashboard() {
           </SelectTrigger>
           <SelectContent>
             {countries.map(country => (
-              <SelectItem key={country.id} value={country.id}>{country.name}</SelectItem>
+              <SelectItem key={country.id} value={country.id}>
+                {country.name}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
 
         <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={() => handleDateChange(-1)}>
-                <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <div className="text-center font-medium min-w-[140px]">
-                <p>{format(currentDate, 'PPP')}</p>
-            </div>
-            <Button variant="outline" size="icon" onClick={() => handleDateChange(1)}>
-                <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" onClick={() => setCurrentDate(new Date())} disabled={isToday(currentDate)}>
-                Today
-            </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => handleDateChange(-1)}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <div className="text-center font-medium min-w-[140px]">
+            <p>{format(currentDate, 'PPP')}</p>
+          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => handleDateChange(1)}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setCurrentDate(new Date())}
+            disabled={isToday(currentDate)}
+          >
+            Today
+          </Button>
         </div>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 md:p-6">
@@ -273,8 +307,8 @@ export function MainDashboard() {
           <StatsPanel stats={currentStats} />
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
             <div className="xl:col-span-3 flex flex-col gap-6">
-               <div className="flex-grow flex flex-col">
-                <MapView 
+              <div className="flex-grow flex flex-col">
+                <MapView
                   country={selectedCountry}
                   selectedRegions={selectedRegions}
                   onToggleRegion={handleToggleRegion}
@@ -284,32 +318,31 @@ export function MainDashboard() {
               </div>
               <LayerControls />
             </div>
-            
           </div>
-           {showForm ? (
-              <div className="xl:col-span-3">
-                <AlertForm
-                  key={selectedAlert?.id || 'new'} // Use key to force re-render on new alert
-                  alert={selectedAlert}
-                  country={selectedCountry}
-                  selectedRegions={selectedRegions}
-                  onSave={handleSaveAlert}
-                  onDelete={handleDeleteAlert}
-                  onCancel={() => {
-                    setSelectedAlert(null);
-                    setIsCreatingNew(false);
-                    setSelectedRegions([]);
-                  }}
-                />
+          {showForm ? (
+            <div className="xl:col-span-3">
+              <AlertForm
+                key={selectedAlert?.id || 'new'} // Use key to force re-render on new alert
+                alert={selectedAlert}
+                country={selectedCountry}
+                selectedRegions={selectedRegions}
+                onSave={handleSaveAlert}
+                onDelete={handleDeleteAlert}
+                onCancel={() => {
+                  setSelectedAlert(null);
+                  setIsCreatingNew(false);
+                  setSelectedRegions([]);
+                }}
+              />
+            </div>
+          ) : (
+            <Card className="xl:col-span-3 flex items-center justify-center h-full bg-card rounded-lg border border-dashed min-h-[200px]">
+              <div className="text-center text-muted-foreground">
+                <p>Select an alert to view details</p>
+                <p className="text-sm">or create a new one.</p>
               </div>
-            ) : (
-                <Card className="xl:col-span-3 flex items-center justify-center h-full bg-card rounded-lg border border-dashed min-h-[200px]">
-                    <div className="text-center text-muted-foreground">
-                        <p>Select an alert to view details</p>
-                        <p className="text-sm">or create a new one.</p>
-                    </div>
-                </Card>
-            )}
+            </Card>
+          )}
         </div>
       </div>
     </div>

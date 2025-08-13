@@ -5,7 +5,10 @@
  * eliminating the need to create separate API routes for many use cases.
  */
 
-import { suggestAlertJustification as suggestAlertJustificationFlow, type SuggestAlertJustificationInput } from "@/ai/flows/suggest-alert-justification";
+import {
+  suggestAlertJustification as suggestAlertJustificationFlow,
+  type SuggestAlertJustificationInput,
+} from '@/ai/flows/suggest-alert-justification';
 
 /**
  * Calls the Genkit AI flow to suggest a justification for a weather alert.
@@ -19,12 +22,14 @@ import { suggestAlertJustification as suggestAlertJustificationFlow, type Sugges
  * call will remain the same. The `ensembleForecasts` property in the input is currently using mock data
  * and should be connected to a real data source.
  */
-export async function suggestJustificationAction(input: SuggestAlertJustificationInput) {
-    try {
-        const result = await suggestAlertJustificationFlow(input);
-        return { success: true, justification: result.justification };
-    } catch (error) {
-        console.error("Error suggesting justification:", error);
-        return { success: false, error: "Failed to generate justification." };
-    }
+export async function suggestJustificationAction(
+  input: SuggestAlertJustificationInput
+) {
+  try {
+    const result = await suggestAlertJustificationFlow(input);
+    return { success: true, justification: result.justification };
+  } catch (error) {
+    console.error('Error suggesting justification:', error);
+    return { success: false, error: 'Failed to generate justification.' };
+  }
 }

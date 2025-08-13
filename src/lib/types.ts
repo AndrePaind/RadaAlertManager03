@@ -8,10 +8,10 @@
  */
 
 // Represents the severity level of an alert.
-export type Severity = "yellow" | "orange" | "red";
+export type Severity = 'yellow' | 'orange' | 'red';
 
 // Represents the lifecycle status of an alert.
-export type AlertStatus = "draft" | "active" | "expired";
+export type AlertStatus = 'draft' | 'active' | 'expired';
 
 /**
  * Represents a single weather alert.

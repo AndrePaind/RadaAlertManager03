@@ -20,8 +20,12 @@ interface AlertsListProps {
   onNewAlert: () => void; // Callback function to initiate creating a new alert.
 }
 
-export function AlertsList({ alerts, selectedAlert, onSelectAlert, onNewAlert }: AlertsListProps) {
-  
+export function AlertsList({
+  alerts,
+  selectedAlert,
+  onSelectAlert,
+  onNewAlert,
+}: AlertsListProps) {
   /**
    * Renders a single alert card.
    * @param alert The alert object to render.
@@ -44,7 +48,9 @@ export function AlertsList({ alerts, selectedAlert, onSelectAlert, onNewAlert }:
         onClick={() => onSelectAlert(alert)}
       >
         <CardHeader className="p-4 flex-row items-start justify-between">
-          <CardTitle className="text-base font-semibold">{alert.eventType}</CardTitle>
+          <CardTitle className="text-base font-semibold">
+            {alert.eventType}
+          </CardTitle>
           <Badge className={cn('text-white', severityMap[alert.severity])}>
             {alert.severity}
           </Badge>
@@ -85,13 +91,31 @@ export function AlertsList({ alerts, selectedAlert, onSelectAlert, onNewAlert }:
           <div className="flex-grow overflow-y-auto px-6">
             <div className="space-y-3 p-1">
               <TabsContent value="drafts" className="mt-0">
-                {drafts.length > 0 ? drafts.map(renderAlert) : <p className="text-center text-sm text-muted-foreground py-4">No draft alerts.</p>}
+                {drafts.length > 0 ? (
+                  drafts.map(renderAlert)
+                ) : (
+                  <p className="text-center text-sm text-muted-foreground py-4">
+                    No draft alerts.
+                  </p>
+                )}
               </TabsContent>
               <TabsContent value="active" className="mt-0">
-                {active.length > 0 ? active.map(renderAlert) : <p className="text-center text-sm text-muted-foreground py-4">No active alerts.</p>}
+                {active.length > 0 ? (
+                  active.map(renderAlert)
+                ) : (
+                  <p className="text-center text-sm text-muted-foreground py-4">
+                    No active alerts.
+                  </p>
+                )}
               </TabsContent>
               <TabsContent value="expired" className="mt-0">
-                {expired.length > 0 ? expired.map(renderAlert) : <p className="text-center text-sm text-muted-foreground py-4">No expired alerts.</p>}
+                {expired.length > 0 ? (
+                  expired.map(renderAlert)
+                ) : (
+                  <p className="text-center text-sm text-muted-foreground py-4">
+                    No expired alerts.
+                  </p>
+                )}
               </TabsContent>
             </div>
           </div>
