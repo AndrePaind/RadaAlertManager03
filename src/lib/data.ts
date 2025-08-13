@@ -124,6 +124,76 @@ export const alerts: Alert[] = [
     lastUpdated: subDays(today, 6),
     version: 1,
   },
+  {
+    id: 'alert-4',
+    countryId: 'colombia',
+    regionIds: ['macro-15', 'macro-11'],
+    severity: 'red',
+    eventType: 'High Winds',
+    pushDateTime: subDays(today, 2),
+    eventDates: { from: subDays(today, 1), to: subDays(today, 1) },
+    justification: 'A strong front will bring damaging winds up to 90 km/h. Secure loose objects and anticipate power outages.',
+    status: 'active',
+    author: 'MeteOps Lead',
+    lastUpdated: subDays(today, 2),
+    version: 1,
+  },
+  {
+    id: 'alert-5',
+    countryId: 'colombia',
+    regionIds: ['macro-7', 'macro-12', 'macro-13'],
+    severity: 'yellow',
+    eventType: 'Thunderstorms',
+    pushDateTime: today,
+    eventDates: { from: addDays(today, 2), to: addDays(today, 2) },
+    justification: 'Scattered thunderstorms are forecast for the afternoon, with a potential for small hail and gusty winds.',
+    status: 'active',
+    author: 'MeteOps Lead',
+    lastUpdated: today,
+    version: 1,
+  },
+  {
+    id: 'alert-6',
+    countryId: 'kenya',
+    regionIds: ['nairobi', 'rift-valley'],
+    severity: 'orange',
+    eventType: 'Flooding',
+    pushDateTime: subDays(today, 1),
+    eventDates: { from: today, to: today },
+    justification: 'Heavy long rains are expected to cause flooding in low-lying areas of Nairobi and the Rift Valley.',
+    status: 'active',
+    author: 'MeteOps Lead',
+    lastUpdated: subDays(today, 1),
+    version: 1,
+  },
+  {
+    id: 'alert-7',
+    countryId: 'kenya',
+    regionIds: ['mombasa'],
+    severity: 'yellow',
+    eventType: 'High Tides',
+    pushDateTime: subDays(today, 10),
+    eventDates: { from: subDays(today, 9), to: subDays(today, 8) },
+    justification: 'Coastal areas may experience minor flooding during high tides.',
+    status: 'expired',
+    author: 'MeteOps Lead',
+    lastUpdated: subDays(today, 10),
+    version: 1,
+  },
+  {
+    id: 'alert-8',
+    countryId: 'colombia',
+    regionIds: ['macro-20', 'macro-21'],
+    severity: 'yellow',
+    eventType: 'Air Quality',
+    pushDateTime: addDays(today, 3),
+    eventDates: { from: addDays(today, 4) },
+    justification: 'Smoke from agricultural burning may reduce air quality to unhealthy levels for sensitive groups.',
+    status: 'draft',
+    author: 'MeteOps Lead',
+    lastUpdated: today,
+    version: 1,
+  }
 ];
 
 // FAKE DATA: List of forecast providers. This could be static or come from a config API.
@@ -168,24 +238,24 @@ const baseStatsByRegion: { [regionId: string]: Stats } = {
 };
 
 // Function to generate different stats for different days by applying a random multiplier
-const generateDateVariantStats = (base: { [regionId: string]: Stats }, date: Date) => {
-  const newStats: { [regionId: string]: Stats } = {};
+const generateDateVariantStats = (base: { [key: string]: Stats }, date: Date) => {
+  const newStats: { [key: string]: Stats } = {};
   const dayOfMonth = date.getDate();
   
-  for (const regionId in base) {
-    newStats[regionId] = {};
-    for (const providerId in base[regionId]) {
-      const multiplier = 1 + ((dayOfMonth % 10) - 5) * 0.05; // Vary by up to 25%
-      const providerStats = base[regionId][providerId];
+  for (const id in base) {
+    newStats[id] = {};
+    for (const providerId in base[id]) {
+      const multiplier = 1 + ((dayOfMonth % 10) - 5) * 0.05 * (id.length % 5) / 2; // Vary by up to ~25%
+      const providerStats = base[id][providerId];
       const newProviderStats = {
         green: Math.round(providerStats.green * multiplier),
         yellow: Math.round(providerStats.yellow * (2 - multiplier)),
         orange: Math.round(providerStats.orange * multiplier),
-        red: Math.round(providerStats.red * (2 - multiplier)),
+        red: Math.round(providerStats.red * (1.5 - multiplier)),
         total: 0
       };
       newProviderStats.total = newProviderStats.green + newProviderStats.yellow + newProviderStats.orange + newProviderStats.red;
-      newStats[regionId][providerId] = newProviderStats;
+      newStats[id][providerId] = newProviderStats;
     }
   }
   return newStats;
@@ -202,14 +272,14 @@ export const statsByRegionForDate = (dateKey: string): { [regionId: string]: Sta
 // FAKE DATA: National-level statistics.
 const baseNationalStats: { [countryId: string]: Stats } = {
     'colombia': {
-      'actual': { green: 295000, yellow: 83000, orange: 16500, red: 980, total: 395480 },
-      'google': { green: 280000, yellow: 90000, orange: 20000, red: 1200, total: 391200 },
-      'openweather': { green: 310000, yellow: 75000, orange: 16000, red: 950, total: 401950 },
+      'actual': { green: 2950000, yellow: 830000, orange: 165000, red: 9800, total: 3954800 },
+      'google': { green: 2800000, yellow: 900000, orange: 200000, red: 12000, total: 3912000 },
+      'openweather': { green: 3100000, yellow: 750000, orange: 160000, red: 9500, total: 4019500 },
     },
     'kenya': {
-        'actual': { green: 160000, yellow: 45000, orange: 10000, red: 800, total: 215800 },
-        'google': { green: 150000, yellow: 50000, orange: 12000, red: 1000, total: 213000 },
-        'openweather': { green: 180000, yellow: 25000, orange: 8000, red: 500, total: 213500 },
+        'actual': { green: 1600000, yellow: 450000, orange: 100000, red: 8000, total: 2158000 },
+        'google': { green: 1500000, yellow: 500000, orange: 120000, red: 10000, total: 2130000 },
+        'openweather': { green: 1800000, yellow: 250000, orange: 80000, red: 5000, total: 2135000 },
     }
 }
 
