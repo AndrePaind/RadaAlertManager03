@@ -17,26 +17,25 @@
  * with `fetch` calls to the new APIs.
  */
 
-import type { Alert, Country, ForecastProvider, Stats } from './types';
+import type { Alert, Country, ForecastProvider, Region, Stats } from './types';
 import { format, subDays, addDays } from 'date-fns';
 
-const createGridRegions = (
-  regions: { id: string; name: string; path: string }[],
-  gridCols: number
-) => {
-  const cellWidth = 120;
-  const cellHeight = 25;
-  const padding = 10;
-  const startY = 10;
-  return regions.map((region, index) => {
-    const col = index % gridCols;
-    const row = Math.floor(index / gridCols);
-    const x = col * (cellWidth + padding) + padding;
-    const y = row * (cellHeight + padding) + startY;
-    const path = `M${x},${y} h${cellWidth} v${cellHeight} h-${cellWidth} Z`;
-    return { ...region, path };
-  });
-};
+const addFakeDataToRegions = (regions: Omit<Region, 'path'>[]): Region[] => {
+  return regions.map(region => ({
+    ...region,
+    path: '', // Path is no longer used for grid layout
+    forecast: {
+      google: Math.floor(Math.random() * 100),
+      openweather: Math.floor(Math.random() * 100),
+    },
+    thresholds: {
+      yellow: 40,
+      orange: 60,
+      red: 80,
+    }
+  }));
+}
+
 
 // FAKE DATA: List of countries and their regions.
 // The `path` property contains SVG path data for rendering the map.
@@ -45,46 +44,40 @@ export const countries: Country[] = [
   {
     id: 'colombia',
     name: 'Colombia',
-    regions: createGridRegions(
-      [
-        { id: 'macro-1', name: 'Caribe', path: '' },
-        { id: 'macro-2', name: 'Eje Cafetero', path: '' },
-        { id: 'macro-3', name: 'Pacífico', path: '' },
-        { id: 'macro-4', name: 'Andina Norte', path: '' },
-        { id: 'macro-5', name: 'Andina Centro', path: '' },
-        { id: 'macro-6', name: 'Andina Sur', path: '' },
-        { id: 'macro-7', name: 'Orinoquía', path: '' },
-        { id: 'macro-8', name: 'Amazonía', path: '' },
-        { id: 'macro-9', name: 'Insular', path: '' },
-        { id: 'macro-10', name: 'Noroccidente', path: '' },
-        { id: 'macro-11', name: 'Suroccidente', path: '' },
-        { id: 'macro-12', name: 'Centro Oriente', path: '' },
-        { id: 'macro-13', name: 'Centro Sur', path: '' },
-        { id: 'macro-14', name: 'Nororiente', path: '' },
-        { id: 'macro-15', name: 'Suroeste', path: '' },
-        { id: 'macro-16', name: 'Magdalena Medio', path: '' },
-        { id: 'macro-17', name: 'Alto Magdalena', path: '' },
-        { id: 'macro-18', name: 'Catatumbo', path: '' },
-        { id: 'macro-19', name: 'Bajo Cauca', path: '' },
-        { id: 'macro-20', name: 'Urabá', path: '' },
-        { id: 'macro-21', name: 'Piedemonte', path: '' },
-      ],
-      3
-    ),
+    regions: addFakeDataToRegions([
+      { id: 'macro-1', name: 'Caribe' },
+      { id: 'macro-2', name: 'Eje Cafetero' },
+      { id: 'macro-3', name: 'Pacífico' },
+      { id: 'macro-4', name: 'Andina Norte' },
+      { id: 'macro-5', name: 'Andina Centro' },
+      { id: 'macro-6', name: 'Andina Sur' },
+      { id: 'macro-7', name: 'Orinoquía' },
+      { id: 'macro-8', name: 'Amazonía' },
+      { id: 'macro-9', name: 'Insular' },
+      { id: 'macro-10', name: 'Noroccidente' },
+      { id: 'macro-11', name: 'Suroccidente' },
+      { id: 'macro-12', name: 'Centro Oriente' },
+      { id: 'macro-13', name: 'Centro Sur' },
+      { id: 'macro-14', name: 'Nororiente' },
+      { id: 'macro-15', name: 'Suroeste' },
+      { id: 'macro-16', name: 'Magdalena Medio' },
+      { id: 'macro-17', name: 'Alto Magdalena' },
+      { id: 'macro-18', name: 'Catatumbo' },
+      { id: 'macro-19', name: 'Bajo Cauca' },
+      { id: 'macro-20', name: 'Urabá' },
+      { id: 'macro-21', name: 'Piedemonte' },
+    ]),
   },
   {
     id: 'kenya',
     name: 'Kenya',
-    regions: createGridRegions(
-      [
-        { id: 'nairobi', name: 'Nairobi', path: '' },
-        { id: 'mombasa', name: 'Mombasa', path: '' },
-        { id: 'kisumu', name: 'Kisumu', path: '' },
-        { id: 'nakuru', name: 'Nakuru', path: '' },
-        { id: 'rift-valley', name: 'Rift Valley', path: '' },
-      ],
-      3
-    ),
+    regions: addFakeDataToRegions([
+      { id: 'nairobi', name: 'Nairobi' },
+      { id: 'mombasa', name: 'Mombasa' },
+      { id: 'kisumu', name: 'Kisumu' },
+      { id: 'nakuru', name: 'Nakuru' },
+      { id: 'rift-valley', name: 'Rift Valley' },
+    ]),
   },
 ];
 

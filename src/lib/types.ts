@@ -40,6 +40,15 @@ export type Region = {
   id: string; // Unique identifier for the region (e.g., 'bogota').
   name: string; // The display name of the region (e.g., 'Bogotá D.C.').
   path: string; // SVG path data for rendering the region on the map.
+  forecast?: {
+    google: number;
+    openweather: number;
+  };
+  thresholds?: {
+    yellow: number;
+    orange: number;
+    red: number;
+  }
 };
 
 /**

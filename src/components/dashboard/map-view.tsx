@@ -8,7 +8,8 @@
 import type { Country, Region, Severity } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { useState, useEffect } from 'react';
+import { CloudRain, Zap } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 interface MapViewProps {
   country: Country; // The country data, including its regions and their SVG paths.
@@ -18,11 +19,6 @@ interface MapViewProps {
   regionSeverities: Map<string, Severity>; // Map of region IDs to their current severity level.
 }
 
-interface RegionWithCenter extends Region {
-  centerX: number;
-  centerY: number;
-}
-
 export function MapView({
   country,
   selectedRegions,
@@ -30,46 +26,10 @@ export function MapView({
   canSelectRegions,
   regionSeverities,
 }: MapViewProps) {
-  const [regionsWithCenters, setRegionsWithCenters] = useState<
-    RegionWithCenter[]
-  >([]);
-
-  useEffect(() => {
-    // This effect calculates the center of each region's SVG path.
-    // It runs on the client-side to avoid SSR errors, as it needs access to the DOM.
-    const calculatedRegions = country.regions.map(region => {
-      // A temporary SVG is created in memory to measure the path's bounding box
-      // without actually rendering it to the screen.
-      const tempSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      tempSvg.style.visibility = 'hidden';
-      tempSvg.style.position = 'absolute';
-
-      const pathElement = document.createElementNS(
-        'http://www.w3.org/2000/svg',
-        'path'
-      );
-      pathElement.setAttribute('d', region.path);
-
-      tempSvg.appendChild(pathElement);
-      document.body.appendChild(tempSvg);
-
-      const bbox = pathElement.getBBox();
-
-      document.body.removeChild(tempSvg);
-
-      return {
-        ...region,
-        centerX: bbox.x + bbox.width / 2,
-        centerY: bbox.y + bbox.height / 2,
-      };
-    });
-    setRegionsWithCenters(calculatedRegions);
-  }, [country.regions]);
-
   const severityColorMap: Record<Severity, string> = {
-    yellow: 'fill-yellow-400/70',
-    orange: 'fill-orange-500/70',
-    red: 'fill-red-600/70',
+    yellow: 'border-yellow-400',
+    orange: 'border-orange-500',
+    red: 'border-red-600',
   };
 
   return (
@@ -77,63 +37,63 @@ export function MapView({
       <CardHeader>
         <CardTitle>Map</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 flex items-center justify-center p-2">
-        {/* The map is an SVG. The region paths are defined in `src/lib/data.ts`. */}
-        {/* @backend-note For a dynamic application, the GeoJSON or SVG path data for regions
-            should be fetched from a backend service, especially if new countries or regions are added. */}
-        <div
-          className="w-full h-full rounded-lg bg-white dark:bg-gray-800 overflow-hidden relative"
-          data-ai-hint="country map"
-        >
-          <svg viewBox="0 0 400 255" className="w-full h-full">
-            <rect
-              width="100%"
-              height="100%"
-              fill="currentColor"
-              className="text-white dark:text-gray-800"
-            />
-            {regionsWithCenters.map(region => {
-              const isSelected = selectedRegions.some(sr => sr.id === region.id);
-              const severity = regionSeverities.get(region.id);
+      <CardContent className="flex-1 p-2">
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2">
+          {country.regions.map(region => {
+            const isSelected = selectedRegions.some(sr => sr.id === region.id);
+            const severity = regionSeverities.get(region.id);
 
-              let fillColor = 'fill-gray-200 dark:fill-gray-600'; // Default color for no severity
-              if (severity) {
-                fillColor = severityColorMap[severity];
-              }
-              if (isSelected) {
-                fillColor = 'fill-primary/70';
-              }
+            let borderClass = 'border-border';
+            if (isSelected) {
+              borderClass = 'border-primary ring-2 ring-primary';
+            } else if (severity) {
+              borderClass = severityColorMap[severity];
+            }
 
-              return (
-                <g
-                  key={region.id}
-                  onClick={() => canSelectRegions && onToggleRegion(region)}
-                  className={cn('group', canSelectRegions && 'cursor-pointer')}
-                >
-                  <path
-                    d={region.path}
-                    className={cn(
-                      'stroke-primary/50 stroke-2 transition-all',
-                      fillColor,
-                      canSelectRegions && 'group-hover:fill-primary/40'
-                    )}
-                  />
-                  {/* Tooltip-like text on hover */}
-                  <text
-                    x={region.centerX}
-                    y={region.centerY}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    fontSize="6"
-                    fill="black"
-                    className="pointer-events-none"
-                  >
+            return (
+              <Card
+                key={region.id}
+                onClick={() => canSelectRegions && onToggleRegion(region)}
+                className={cn(
+                  'transition-all',
+                  canSelectRegions && 'cursor-pointer hover:shadow-lg',
+                  'border-2',
+                  borderClass
+                )}
+              >
+                <CardHeader className="p-2">
+                  <CardTitle className="text-sm text-center">
                     {region.name}
-                  </text>
-                </g>
-              );
-            })}
-          </svg>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-2 space-y-2 text-xs">
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Google</span>
+                    <div className="flex items-center gap-1">
+                      <CloudRain className="w-3 h-3 text-blue-400" />
+                      <span>{region.forecast?.google || 'N/A'}mm</span>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">OpenWeather</span>
+                     <div className="flex items-center gap-1">
+                      <CloudRain className="w-3 h-3 text-blue-400" />
+                      <span>{region.forecast?.openweather || 'N/A'}mm</span>
+                    </div>
+                  </div>
+                  <Separator />
+                   <div className="space-y-1 text-center">
+                      <p className="font-medium">Thresholds (mm)</p>
+                      <div className="flex justify-around">
+                        <p><span className="text-yellow-500">Y:</span> {region.thresholds?.yellow}</p>
+                        <p><span className="text-orange-500">O:</span> {region.thresholds?.orange}</p>
+                        <p><span className="text-red-600">R:</span> {region.thresholds?.red}</p>
+                      </div>
+                   </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </CardContent>
     </Card>

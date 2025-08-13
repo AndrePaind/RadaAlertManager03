@@ -1,13 +1,10 @@
 'use client';
 /**
- * @fileoverview This component displays a statistical summary, comparing "Actual"
- * (actual user status) with forecasts from various providers.
+ * @fileoverview This component displays a statistical summary of "Actual"
+ * (actual user status).
  */
 
 import type { Stats } from '@/lib/types';
-// FAKE DATA: Importing mock forecast provider metadata.
-import { forecastProviders } from '@/lib/data';
-import { Separator } from '../ui/separator';
 import {
   Card,
   CardContent,
@@ -46,19 +43,17 @@ export function StatsPanel({ stats }: StatsPanelProps) {
   // compared to forecast providers.
 
   const actualStats = stats?.['actual'];
-  const otherProviders = forecastProviders.filter(p => p.id !== 'actual');
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Statistical Summary</CardTitle>
         <CardDescription>
-          Comparison of real-time user status against forecast provider
-          predictions.
+          Overview of real-time user status.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {!stats ? (
+        {!stats || !actualStats ? (
           // Display a message if no stats are available for the current selection.
           <div className="flex items-center justify-center h-24">
             <p className="text-muted-foreground">
@@ -66,86 +61,35 @@ export function StatsPanel({ stats }: StatsPanelProps) {
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {/* "Actual" Section */}
-            {actualStats && (
-              <div>
-                <h4 className="text-sm font-semibold mb-2">Actual</h4>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                  <StatCard
-                    title="Green"
-                    value={actualStats.green}
-                    colorClass="text-green-600"
-                  />
-                  <StatCard
-                    title="Yellow"
-                    value={actualStats.yellow}
-                    colorClass="text-yellow-500"
-                  />
-                  <StatCard
-                    title="Orange"
-                    value={actualStats.orange}
-                    colorClass="text-orange-500"
-                  />
-                  <StatCard
-                    title="Red"
-                    value={actualStats.red}
-                    colorClass="text-red-600"
-                  />
-                  <div className="flex flex-col items-center p-2 rounded-lg bg-card flex-1 col-span-2 md:col-span-1">
-                    <p className="text-sm font-medium">Total</p>
-                    <p className="text-xl font-bold">
-                      {actualStats.total.toLocaleString()}
-                    </p>
-                  </div>
-                </div>
+          <div>
+            <h4 className="text-sm font-semibold mb-2">Actual</h4>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+              <StatCard
+                title="Green"
+                value={actualStats.green}
+                colorClass="text-green-600"
+              />
+              <StatCard
+                title="Yellow"
+                value={actualStats.yellow}
+                colorClass="text-yellow-500"
+              />
+              <StatCard
+                title="Orange"
+                value={actualStats.orange}
+                colorClass="text-orange-500"
+              />
+              <StatCard
+                title="Red"
+                value={actualStats.red}
+                colorClass="text-red-600"
+              />
+              <div className="flex flex-col items-center p-2 rounded-lg bg-card flex-1 col-span-2 md:col-span-1">
+                <p className="text-sm font-medium">Total</p>
+                <p className="text-xl font-bold">
+                  {actualStats.total.toLocaleString()}
+                </p>
               </div>
-            )}
-
-            <Separator />
-
-            {/* "Forecasts" Section */}
-            <div className="space-y-4">
-              <h4 className="text-sm font-semibold">Forecasts</h4>
-              {otherProviders.map(provider => {
-                const providerStats = stats[provider.id];
-                if (!providerStats) return null;
-                return (
-                  <div key={provider.id}>
-                    <h5 className="text-xs font-medium text-muted-foreground mb-2">
-                      {provider.name}
-                    </h5>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                      <StatCard
-                        title="Green"
-                        value={providerStats.green}
-                        colorClass="text-green-600"
-                      />
-                      <StatCard
-                        title="Yellow"
-                        value={providerStats.yellow}
-                        colorClass="text-yellow-500"
-                      />
-                      <StatCard
-                        title="Orange"
-                        value={providerStats.orange}
-                        colorClass="text-orange-500"
-                      />
-                      <StatCard
-                        title="Red"
-                        value={providerStats.red}
-                        colorClass="text-red-600"
-                      />
-                      <div className="flex flex-col items-center p-2 rounded-lg bg-card flex-1 col-span-2 md:col-span-1">
-                        <p className="text-sm font-medium">Total</p>
-                        <p className="text-xl font-bold">
-                          {providerStats.total.toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
             </div>
           </div>
         )}
