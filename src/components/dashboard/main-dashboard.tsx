@@ -126,8 +126,8 @@ export function MainDashboard() {
           </SelectContent>
         </Select>
       </div>
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 md:p-6 overflow-hidden">
-        <div className="lg:col-span-3 flex flex-col gap-6 overflow-y-auto">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 md:p-6 h-[calc(100vh-140px)]">
+        <div className="lg:col-span-3 flex flex-col gap-6">
           <AlertsList
             alerts={countryAlerts}
             selectedAlert={selectedAlert}
@@ -136,8 +136,8 @@ export function MainDashboard() {
           />
         </div>
 
-        <div className="lg:col-span-9 grid grid-cols-1 xl:grid-cols-3 gap-6 overflow-hidden">
-          <div className="xl:col-span-2 flex flex-col gap-6 overflow-y-auto">
+        <div className="lg:col-span-9 grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div className="xl:col-span-2 flex flex-col gap-6">
             <StatsPanel stats={currentStats} />
             <MapView 
               country={selectedCountry}
@@ -147,7 +147,7 @@ export function MainDashboard() {
             />
             <LayerControls />
           </div>
-          <div className="xl:col-span-1 overflow-y-auto">
+          <div className="xl:col-span-1">
             {showForm ? (
               <AlertForm
                 key={selectedAlert?.id || 'new'}

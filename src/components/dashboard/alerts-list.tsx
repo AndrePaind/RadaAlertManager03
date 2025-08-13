@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { PlusCircle } from 'lucide-react';
+import { ScrollArea } from '../ui/scroll-area';
 
 interface AlertsListProps {
   alerts: Alert[];
@@ -51,7 +52,7 @@ export function AlertsList({ alerts, selectedAlert, onSelectAlert, onNewAlert }:
   const expired = alerts.filter(a => a.status === 'expired');
 
   return (
-    <Card>
+    <Card className="flex flex-col h-full">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Manage Alerts</CardTitle>
         <Button size="sm" onClick={onNewAlert}>
@@ -59,24 +60,26 @@ export function AlertsList({ alerts, selectedAlert, onSelectAlert, onNewAlert }:
           New Alert
         </Button>
       </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="drafts">
+      <CardContent className="flex flex-col flex-grow">
+        <Tabs defaultValue="drafts" className="flex flex-col flex-grow">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="drafts">Drafts</TabsTrigger>
             <TabsTrigger value="active">Active</TabsTrigger>
             <TabsTrigger value="expired">Expired</TabsTrigger>
           </TabsList>
-          <div className="mt-4 space-y-3 max-h-[400px] overflow-y-auto p-1">
-             <TabsContent value="drafts">
-              {drafts.length > 0 ? drafts.map(renderAlert) : <p className="text-center text-sm text-muted-foreground py-4">No draft alerts.</p>}
-            </TabsContent>
-            <TabsContent value="active">
-              {active.length > 0 ? active.map(renderAlert) : <p className="text-center text-sm text-muted-foreground py-4">No active alerts.</p>}
-            </TabsContent>
-            <TabsContent value="expired">
-              {expired.length > 0 ? expired.map(renderAlert) : <p className="text-center text-sm text-muted-foreground py-4">No expired alerts.</p>}
-            </TabsContent>
-          </div>
+          <ScrollArea className="flex-grow mt-4">
+            <div className="space-y-3 p-1">
+              <TabsContent value="drafts" className="mt-0">
+                {drafts.length > 0 ? drafts.map(renderAlert) : <p className="text-center text-sm text-muted-foreground py-4">No draft alerts.</p>}
+              </TabsContent>
+              <TabsContent value="active" className="mt-0">
+                {active.length > 0 ? active.map(renderAlert) : <p className="text-center text-sm text-muted-foreground py-4">No active alerts.</p>}
+              </TabsContent>
+              <TabsContent value="expired" className="mt-0">
+                {expired.length > 0 ? expired.map(renderAlert) : <p className="text-center text-sm text-muted-foreground py-4">No expired alerts.</p>}
+              </TabsContent>
+            </div>
+          </ScrollArea>
         </Tabs>
       </CardContent>
     </Card>
