@@ -9,17 +9,16 @@
  * - LayerControls: Provides options to toggle map layers.
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { Alert, Country, Region, Severity, Stats } from '@/lib/types';
 // FAKE DATA: Importing mock data. In a real application, this would be fetched from a backend API.
 import {
   alerts as initialAlerts,
-  countries,
+  getCountries,
   statsByRegionForDate,
   nationalStatsForDate,
 } from '@/lib/data';
 import { AlertsList } from './alerts-list';
-import { LayerControls } from './layer-controls';
 import { MapView } from './map-view';
 import { StatsPanel } from './stats-panel';
 import { AlertForm } from './alert-form';
@@ -44,8 +43,10 @@ export function MainDashboard() {
   // The list of all alerts. Initialized with mock data.
   const [alerts, setAlerts] = useState<Alert[]>(initialAlerts);
 
+  const [countries, setCountries] = useState<Country[]>([]);
+
   // The currently selected country. Defaults to the first country in the mock data.
-  const [selectedCountry, setSelectedCountry] = useState<Country>(countries[0]);
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
 
   // The list of regions selected on the map.
   const [selectedRegions, setSelectedRegions] = useState<Region[]>([]);
@@ -58,6 +59,23 @@ export function MainDashboard() {
 
   // The currently selected date for viewing forecasts and alerts.
   const [currentDate, setCurrentDate] = useState(new Date());
+
+  useEffect(() => {
+    const dateKey = format(currentDate, 'yyyy-MM-dd');
+    const newCountries = getCountries(dateKey);
+    setCountries(newCountries);
+
+    if (!selectedCountry) {
+      setSelectedCountry(newCountries[0]);
+    } else {
+      const updatedCountry = newCountries.find(c => c.id === selectedCountry.id);
+      if (updatedCountry) {
+        setSelectedCountry(updatedCountry);
+      } else {
+        setSelectedCountry(newCountries[0]);
+      }
+    }
+  }, [currentDate, selectedCountry]);
 
   // HANDLERS
 
@@ -159,6 +177,7 @@ export function MainDashboard() {
    * e.g., fetching `/api/alerts?countryId=${selectedCountry.id}`.
    */
   const countryAlerts = useMemo(() => {
+    if (!selectedCountry) return [];
     return alerts.filter(alert => alert.countryId === selectedCountry.id);
   }, [alerts, selectedCountry]);
 
@@ -207,6 +226,8 @@ export function MainDashboard() {
    */
   const currentStats = useMemo(() => {
     const dateKey = format(currentDate, 'yyyy-MM-dd');
+    if (!selectedCountry) return null;
+
     const countryNationalStats = nationalStatsForDate(dateKey)[
       selectedCountry.id
     ];
@@ -242,11 +263,19 @@ export function MainDashboard() {
       }
     }
     return aggregated;
-  }, [selectedRegions, selectedCountry.id, currentDate]);
+  }, [selectedRegions, selectedCountry, currentDate]);
 
   // Conditional rendering flags
   const showForm = isCreatingNew || selectedAlert;
   const canSelectRegions = isCreatingNew || selectedAlert;
+
+  if (!selectedCountry) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen">
@@ -291,7 +320,7 @@ export function MainDashboard() {
           </Button>
         </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 md:p-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 md:p-6 overflow-y-auto">
         {/* Left Column: Alerts List */}
         <div className="lg:col-span-3">
           <AlertsList
@@ -305,20 +334,13 @@ export function MainDashboard() {
         {/* Center & Right Column combined */}
         <div className="lg:col-span-9 flex flex-col gap-6">
           <StatsPanel stats={currentStats} />
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            <div className="xl:col-span-3 flex flex-col gap-6">
-              <div className="flex-grow flex flex-col">
-                <MapView
-                  country={selectedCountry}
-                  selectedRegions={selectedRegions}
-                  onToggleRegion={handleToggleRegion}
-                  canSelectRegions={canSelectRegions}
-                  regionSeverities={regionSeverities}
-                />
-              </div>
-              <LayerControls />
-            </div>
-          </div>
+          <MapView
+            country={selectedCountry}
+            selectedRegions={selectedRegions}
+            onToggleRegion={handleToggleRegion}
+            canSelectRegions={canSelectRegions}
+            regionSeverities={regionSeverities}
+          />
           {showForm ? (
             <div className="xl:col-span-3">
               <AlertForm

@@ -20,13 +20,19 @@
 import type { Alert, Country, ForecastProvider, Region, Stats } from './types';
 import { format, subDays, addDays } from 'date-fns';
 
-const addFakeDataToRegions = (regions: Omit<Region, 'path'>[]): Region[] => {
+const generateForecastValue = (base: number, date: Date, regionName: string) => {
+    const daySeed = date.getDate() + regionName.charCodeAt(0);
+    const randomFactor = ((daySeed % 15) - 7) / 10; // Fluctuation between -0.7 and +0.7
+    return Math.max(0, Math.round(base * (1 + randomFactor)));
+}
+
+const addFakeDataToRegions = (regions: Omit<Region, 'path' | 'forecast' | 'thresholds'>[], date: Date): Region[] => {
   return regions.map(region => ({
     ...region,
     path: '', // Path is no longer used for grid layout
     forecast: {
-      google: Math.floor(Math.random() * 100),
-      openweather: Math.floor(Math.random() * 100),
+      google: generateForecastValue(50, date, region.name + 'g'),
+      openweather: generateForecastValue(55, date, region.name + 'o'),
     },
     thresholds: {
       yellow: 40,
@@ -38,13 +44,11 @@ const addFakeDataToRegions = (regions: Omit<Region, 'path'>[]): Region[] => {
 
 
 // FAKE DATA: List of countries and their regions.
-// The `path` property contains SVG path data for rendering the map.
-// The regions are laid out in a dense grid.
-export const countries: Country[] = [
+const getBaseCountries = (): Omit<Country, 'regions'> & { regions: Omit<Region, 'path' | 'forecast' | 'thresholds'>[] }[] => [
   {
     id: 'colombia',
     name: 'Colombia',
-    regions: addFakeDataToRegions([
+    regions: [
       { id: 'macro-1', name: 'Caribe' },
       { id: 'macro-2', name: 'Eje Cafetero' },
       { id: 'macro-3', name: 'Pacífico' },
@@ -66,20 +70,35 @@ export const countries: Country[] = [
       { id: 'macro-19', name: 'Bajo Cauca' },
       { id: 'macro-20', name: 'Urabá' },
       { id: 'macro-21', name: 'Piedemonte' },
-    ]),
+    ],
   },
   {
     id: 'kenya',
     name: 'Kenya',
-    regions: addFakeDataToRegions([
+    regions: [
       { id: 'nairobi', name: 'Nairobi' },
       { id: 'mombasa', name: 'Mombasa' },
       { id: 'kisumu', name: 'Kisumu' },
       { id: 'nakuru', name: 'Nakuru' },
       { id: 'rift-valley', name: 'Rift Valley' },
-    ]),
+    ],
   },
 ];
+
+const countryCache = new Map<string, Country[]>();
+export const getCountries = (dateKey: string): Country[] => {
+  if (countryCache.has(dateKey)) {
+    return countryCache.get(dateKey)!;
+  }
+  const date = new Date(dateKey);
+  const countries = getBaseCountries().map(country => ({
+    ...country,
+    regions: addFakeDataToRegions(country.regions, date),
+  }));
+  countryCache.set(dateKey, countries);
+  return countries;
+}
+
 
 const today = new Date();
 // FAKE DATA: Initial list of alerts.

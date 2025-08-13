@@ -7,9 +7,8 @@
 
 import type { Country, Region, Severity } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-import { CloudRain, Zap } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
+import { LayerControls } from './layer-controls';
+import { RegionGrid } from './region-grid';
 
 interface MapViewProps {
   country: Country; // The country data, including its regions and their SVG paths.
@@ -26,75 +25,31 @@ export function MapView({
   canSelectRegions,
   regionSeverities,
 }: MapViewProps) {
-  const severityColorMap: Record<Severity, string> = {
-    yellow: 'border-yellow-400',
-    orange: 'border-orange-500',
-    red: 'border-red-600',
-  };
-
   return (
     <Card className="flex-1 flex flex-col">
       <CardHeader>
         <CardTitle>Map</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 p-2">
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2">
-          {country.regions.map(region => {
-            const isSelected = selectedRegions.some(sr => sr.id === region.id);
-            const severity = regionSeverities.get(region.id);
-
-            let borderClass = 'border-border';
-            if (isSelected) {
-              borderClass = 'border-primary ring-2 ring-primary';
-            } else if (severity) {
-              borderClass = severityColorMap[severity];
-            }
-
-            return (
-              <Card
-                key={region.id}
-                onClick={() => canSelectRegions && onToggleRegion(region)}
-                className={cn(
-                  'transition-all',
-                  canSelectRegions && 'cursor-pointer hover:shadow-lg',
-                  'border-2',
-                  borderClass
-                )}
-              >
-                <CardHeader className="p-2">
-                  <CardTitle className="text-sm text-center">
-                    {region.name}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-2 space-y-2 text-xs">
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Google</span>
-                    <div className="flex items-center gap-1">
-                      <CloudRain className="w-3 h-3 text-blue-400" />
-                      <span>{region.forecast?.google || 'N/A'}mm</span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">OpenWeather</span>
-                     <div className="flex items-center gap-1">
-                      <CloudRain className="w-3 h-3 text-blue-400" />
-                      <span>{region.forecast?.openweather || 'N/A'}mm</span>
-                    </div>
-                  </div>
-                  <Separator />
-                   <div className="space-y-1 text-center">
-                      <p className="font-medium">Thresholds (mm)</p>
-                      <div className="flex justify-around">
-                        <p><span className="text-yellow-500">Y:</span> {region.thresholds?.yellow}</p>
-                        <p><span className="text-orange-500">O:</span> {region.thresholds?.orange}</p>
-                        <p><span className="text-red-600">R:</span> {region.thresholds?.red}</p>
-                      </div>
-                   </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+      <CardContent className="flex-1 flex flex-col gap-4 p-2">
+        {/* @backend-note This is a placeholder for the real GIS map component.
+            The backend team will need to integrate a mapping library (e.g., Mapbox, Leaflet) here.
+            The `LayerControls` component will interact with this map to toggle GIS layers.
+        */}
+        <div 
+          className="relative bg-muted/20 border border-dashed rounded-lg flex items-center justify-center"
+          style={{ height: '300px' }}
+          data-ai-hint="country map"
+        >
+          <p className="text-muted-foreground">GIS Map View Placeholder</p>
         </div>
+        <LayerControls />
+        <RegionGrid
+          country={country}
+          selectedRegions={selectedRegions}
+          onToggleRegion={onToggleRegion}
+          canSelectRegions={canSelectRegions}
+          regionSeverities={regionSeverities}
+        />
       </CardContent>
     </Card>
   );
