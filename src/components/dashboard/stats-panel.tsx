@@ -1,6 +1,6 @@
 'use client';
 /**
- * @fileoverview This component displays a statistical summary, comparing "Reality"
+ * @fileoverview This component displays a statistical summary, comparing "Actual"
  * (actual user status) with forecasts from various providers.
  */
 
@@ -29,11 +29,11 @@ export function StatsPanel({ stats }: StatsPanelProps) {
   // @backend-note The stats data is passed as a prop from MainDashboard.
   // This data is derived from the mock data in `src/lib/data.ts`.
   // In a real application, this data would be fetched from a backend API.
-  // The 'reality' stats would likely come from a separate source (e.g., user reports)
+  // The 'actual' stats would likely come from a separate source (e.g., user reports)
   // compared to forecast providers.
 
-  const realityStats = stats?.['reality'];
-  const otherProviders = forecastProviders.filter(p => p.id !== 'reality');
+  const actualStats = stats?.['actual'];
+  const otherProviders = forecastProviders.filter(p => p.id !== 'actual');
 
   return (
     <Card>
@@ -49,18 +49,18 @@ export function StatsPanel({ stats }: StatsPanelProps) {
           </div>
         ) : (
         <div className="space-y-4">
-            {/* "Reality" Section */}
-            {realityStats && (
+            {/* "Actual" Section */}
+            {actualStats && (
                  <div>
-                    <h4 className="text-sm font-semibold mb-2">Reality</h4>
+                    <h4 className="text-sm font-semibold mb-2">Actual</h4>
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                        <StatCard title="Green" value={realityStats.green} colorClass="text-green-600" />
-                        <StatCard title="Yellow" value={realityStats.yellow} colorClass="text-yellow-500" />
-                        <StatCard title="Orange" value={realityStats.orange} colorClass="text-orange-500" />
-                        <StatCard title="Red" value={realityStats.red} colorClass="text-red-600" />
+                        <StatCard title="Green" value={actualStats.green} colorClass="text-green-600" />
+                        <StatCard title="Yellow" value={actualStats.yellow} colorClass="text-yellow-500" />
+                        <StatCard title="Orange" value={actualStats.orange} colorClass="text-orange-500" />
+                        <StatCard title="Red" value={actualStats.red} colorClass="text-red-600" />
                         <div className="flex flex-col items-center p-2 rounded-lg bg-card flex-1 col-span-2 md:col-span-1">
                             <p className="text-sm font-medium">Total</p>
-                            <p className="text-xl font-bold">{realityStats.total.toLocaleString()}</p>
+                            <p className="text-xl font-bold">{actualStats.total.toLocaleString()}</p>
                         </div>
                     </div>
                 </div>
