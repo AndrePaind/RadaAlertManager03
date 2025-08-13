@@ -7,7 +7,7 @@
  */
 
 import type { Country, Region } from '@/lib/types';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 
@@ -58,12 +58,15 @@ export function MapView({ country, selectedRegions, onToggleRegion, canSelectReg
 
   return (
     <Card className="flex-1 flex flex-col">
+        <CardHeader>
+            <CardTitle>Map</CardTitle>
+        </CardHeader>
       <CardContent className="flex-1 flex items-center justify-center p-2">
         {/* The map is an SVG. The region paths are defined in `src/lib/data.ts`. */}
         {/* @backend-note For a dynamic application, the GeoJSON or SVG path data for regions
             should be fetched from a backend service, especially if new countries or regions are added. */}
         <div className="w-full h-full rounded-lg bg-white dark:bg-gray-800 overflow-hidden relative" data-ai-hint="country map">
-          <svg viewBox="0 0 420 240" className="w-full h-full">
+          <svg viewBox="0 0 400 255" className="w-full h-full">
             <rect width="100%" height="100%" fill="currentColor" className="text-white dark:text-gray-800" />
             {regionsWithCenters.map((region) => {
               const isSelected = selectedRegions.some(sr => sr.id === region.id);
