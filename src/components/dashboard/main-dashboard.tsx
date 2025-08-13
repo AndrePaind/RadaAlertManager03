@@ -134,18 +134,18 @@ export function MainDashboard() {
             onSelectAlert={handleSelectAlert}
             onNewAlert={handleNewAlert}
           />
-           <StatsPanel stats={currentStats} />
         </div>
 
         <div className="lg:col-span-9 grid grid-cols-1 xl:grid-cols-3 gap-6 overflow-hidden">
           <div className="xl:col-span-2 flex flex-col gap-6 overflow-y-auto">
+            <StatsPanel stats={currentStats} />
             <MapView 
               country={selectedCountry}
               selectedRegions={selectedRegions}
               onToggleRegion={handleToggleRegion}
               canSelectRegions={canSelectRegions}
             />
-             <LayerControls />
+            <LayerControls />
           </div>
           <div className="xl:col-span-1 overflow-y-auto">
             {showForm ? (
