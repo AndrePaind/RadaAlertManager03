@@ -49,7 +49,7 @@ export function StatsPanel({ stats }: StatsPanelProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Statistical Summary</CardTitle>
+        <CardTitle>Summary</CardTitle>
         <CardDescription>
           Overview of real-time user status.
         </CardDescription>
