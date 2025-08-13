@@ -75,27 +75,29 @@ export function MainDashboard() {
   }, [alerts, selectedCountry]);
 
   const currentStats = useMemo(() => {
-    const countryNationalStats = nationalStats[selectedCountry.id];
-    if (!countryNationalStats) {
+    if (!nationalStats[selectedCountry.id]) {
       return null;
     }
-
+    const countryNationalStats = nationalStats[selectedCountry.id];
+    
     if (selectedRegions.length === 0) {
       return countryNationalStats;
     }
     
     // Aggregate stats for selected regions
-    const aggregated = {};
+    const aggregated: Stats = {};
     for (const provider of Object.keys(countryNationalStats)) {
-      aggregated[provider] = { green: 0, yellow: 0, orange: 0, red: 0, total: 0 };
+        aggregated[provider] = { green: 0, yellow: 0, orange: 0, red: 0, total: 0 };
     }
 
     for (const region of selectedRegions) {
         const regionStats = statsByRegion[region.id];
         if(regionStats) {
             for (const provider in regionStats) {
-                for (const level in regionStats[provider]) {
-                    aggregated[provider][level] += regionStats[provider][level];
+                if (aggregated[provider]) {
+                    for (const level in regionStats[provider]) {
+                        aggregated[provider][level] += regionStats[provider][level];
+                    }
                 }
             }
         }
@@ -127,7 +129,6 @@ export function MainDashboard() {
             onSelectAlert={handleSelectAlert}
             onNewAlert={handleNewAlert}
           />
-          <LayerControls />
         </div>
 
         <div className="lg:col-span-9 grid grid-cols-1 xl:grid-cols-3 gap-6 overflow-hidden">
@@ -137,6 +138,7 @@ export function MainDashboard() {
               selectedRegions={selectedRegions}
               onToggleRegion={handleToggleRegion}
             />
+            <LayerControls />
             <StatsPanel stats={currentStats} />
           </div>
           <div className="xl:col-span-1 overflow-y-auto">
