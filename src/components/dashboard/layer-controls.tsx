@@ -14,40 +14,46 @@ export function LayerControls() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-            <h4 className="font-medium text-sm">User Data</h4>
-            <div className="flex items-center space-x-2">
-                <Checkbox id="user-locations" defaultChecked />
-                <Label htmlFor="user-locations">Show User Locations</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-                <Checkbox id="user-thresholds" defaultChecked />
-                <Label htmlFor="user-thresholds">Show User Thresholds</Label>
+            <h4 className="font-medium text-sm mb-2">User Data</h4>
+            <div className="flex flex-wrap gap-x-6 gap-y-2">
+                <div className="flex items-center space-x-2">
+                    <Checkbox id="user-locations" defaultChecked />
+                    <Label htmlFor="user-locations">Show User Locations</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                    <Checkbox id="user-thresholds" defaultChecked />
+                    <Label htmlFor="user-thresholds">Show User Thresholds</Label>
+                </div>
             </div>
         </div>
 
         <Separator />
         
         <div className="space-y-2">
-            <h4 className="font-medium text-sm">Forecast Providers</h4>
-            {forecastProviders.map(provider => (
-                <div key={provider.id} className="flex items-center space-x-2">
-                    <Checkbox id={`provider-${provider.id}`} defaultChecked />
-                    <Label htmlFor={`provider-${provider.id}`}>{provider.name}</Label>
-                </div>
-            ))}
+            <h4 className="font-medium text-sm mb-2">Forecast Providers</h4>
+             <div className="flex flex-wrap gap-x-6 gap-y-2">
+                {forecastProviders.map(provider => (
+                    <div key={provider.id} className="flex items-center space-x-2">
+                        <Checkbox id={`provider-${provider.id}`} defaultChecked />
+                        <Label htmlFor={`provider-${provider.id}`}>{provider.name}</Label>
+                    </div>
+                ))}
+            </div>
         </div>
 
         <Separator />
 
         <div className="space-y-2">
-            <h4 className="font-medium text-sm">Infrastructure</h4>
-            <div className="flex items-center space-x-2">
-                <Checkbox id="fsp-branches" />
-                <Label htmlFor="fsp-branches">FSP Branches</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-                <Checkbox id="fsp-agents" />
-                <Label htmlFor="fsp-agents">FSP Agents</Label>
+            <h4 className="font-medium text-sm mb-2">Infrastructure</h4>
+            <div className="flex flex-wrap gap-x-6 gap-y-2">
+                <div className="flex items-center space-x-2">
+                    <Checkbox id="fsp-branches" />
+                    <Label htmlFor="fsp-branches">FSP Branches</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                    <Checkbox id="fsp-agents" />
+                    <Label htmlFor="fsp-agents">FSP Agents</Label>
+                </div>
             </div>
         </div>
       </CardContent>

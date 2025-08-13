@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import type { Alert, Country, Region } from '@/lib/types';
+import type { Alert, Country, Region, Stats } from '@/lib/types';
 import { alerts as initialAlerts, countries, statsByRegion, nationalStats } from '@/lib/data';
 import { AlertsList } from './alerts-list';
 import { LayerControls } from './layer-controls';
@@ -46,11 +46,13 @@ export function MainDashboard() {
   };
 
   const handleToggleRegion = (region: Region) => {
-    setSelectedRegions(prev =>
-      prev.find(r => r.id === region.id)
-        ? prev.filter(r => r.id !== region.id)
-        : [...prev, region]
-    );
+    if (isCreatingNew || selectedAlert) {
+        setSelectedRegions(prev =>
+          prev.find(r => r.id === region.id)
+            ? prev.filter(r => r.id !== region.id)
+            : [...prev, region]
+        );
+    }
   };
   
   const handleSaveAlert = (alertToSave: Alert) => {
@@ -86,17 +88,18 @@ export function MainDashboard() {
     
     // Aggregate stats for selected regions
     const aggregated: Stats = {};
-    for (const provider of Object.keys(countryNationalStats)) {
+    const providers = Object.keys(countryNationalStats);
+    for (const provider of providers) {
         aggregated[provider] = { green: 0, yellow: 0, orange: 0, red: 0, total: 0 };
     }
 
     for (const region of selectedRegions) {
         const regionStats = statsByRegion[region.id];
         if(regionStats) {
-            for (const provider in regionStats) {
-                if (aggregated[provider]) {
-                    for (const level in regionStats[provider]) {
-                        aggregated[provider][level] += regionStats[provider][level];
+            for (const provider of providers) {
+                if (aggregated[provider] && regionStats[provider]) {
+                    for (const level of Object.keys(regionStats[provider])) {
+                        (aggregated[provider] as any)[level] += (regionStats[provider] as any)[level];
                     }
                 }
             }
@@ -106,6 +109,8 @@ export function MainDashboard() {
   }, [selectedRegions, selectedCountry.id]);
   
   const showForm = isCreatingNew || selectedAlert;
+  const canSelectRegions = isCreatingNew || selectedAlert;
+
 
   return (
     <div className="flex flex-col h-full">
@@ -129,6 +134,7 @@ export function MainDashboard() {
             onSelectAlert={handleSelectAlert}
             onNewAlert={handleNewAlert}
           />
+           <StatsPanel stats={currentStats} />
         </div>
 
         <div className="lg:col-span-9 grid grid-cols-1 xl:grid-cols-3 gap-6 overflow-hidden">
@@ -137,9 +143,9 @@ export function MainDashboard() {
               country={selectedCountry}
               selectedRegions={selectedRegions}
               onToggleRegion={handleToggleRegion}
+              canSelectRegions={canSelectRegions}
             />
-            <LayerControls />
-            <StatsPanel stats={currentStats} />
+             <LayerControls />
           </div>
           <div className="xl:col-span-1 overflow-y-auto">
             {showForm ? (
@@ -153,6 +159,7 @@ export function MainDashboard() {
                 onCancel={() => {
                   setSelectedAlert(null);
                   setIsCreatingNew(false);
+                  setSelectedRegions([]);
                 }}
               />
             ) : (
