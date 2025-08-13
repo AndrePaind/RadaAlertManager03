@@ -16,26 +16,10 @@ interface MapViewProps {
   onToggleRegion: (region: Region) => void;
 }
 
-const mapDimensions = {
-  width: 500,
-  height: 400
-}
-
-const FAKE_KENYA_SVG_PATHS = {
-    'nairobi': "M248,187 L260,182 L265,195 L250,200 Z",
-    'mombasa': "M340,240 L355,235 L360,250 L345,255 Z",
-    'kisumu': "M160,150 L175,145 L180,160 L165,165 Z",
-    'nakuru': "M220,140 L235,135 L240,150 L225,155 Z",
-    'rift-valley': "M150,50 L300,60 L290,180 L140,170 Z"
-};
-
 export function MapView({ country, selectedRegions, onToggleRegion }: MapViewProps) {
     const [date, setDate] = useState<Date>(new Date());
 
-    const countryRegions = country.regions.map(r => ({
-        ...r,
-        path: FAKE_KENYA_SVG_PATHS[r.id] || r.path,
-    }));
+    const countryRegions = country.regions;
 
   return (
     <Card className="flex-1 flex flex-col">
