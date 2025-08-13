@@ -115,7 +115,6 @@ export function MapView({ country, selectedRegions, onToggleRegion, canSelectReg
                 </g>
               );
             })}
-             <text x={10} y={12} fontSize="8" className="fill-foreground/50 font-semibold">{country.name} Regions</text>
           </svg>
         </div>
       </CardContent>

@@ -30,12 +30,13 @@ export const countries: Country[] = [
         const gridCols = 3;
         const cellWidth = 120;
         const cellHeight = 25;
-        const padding = 5;
+        const padding = 10; // Increased padding
+        const startY = 10; // Start grid lower
         return regions.map((region, index) => {
             const col = index % gridCols;
             const row = Math.floor(index / gridCols);
             const x = col * (cellWidth + padding) + padding;
-            const y = row * (cellHeight + padding) + padding + 20; // +20 for title
+            const y = row * (cellHeight + padding) + startY;
             const path = `M${x},${y} h${cellWidth} v${cellHeight} h-${cellWidth} Z`;
             return { ...region, path };
         });
