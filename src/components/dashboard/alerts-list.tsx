@@ -11,7 +11,6 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { PlusCircle } from 'lucide-react';
-import { ScrollArea } from '../ui/scroll-area';
 
 interface AlertsListProps {
   alerts: Alert[]; // The list of all alerts for the selected country.
@@ -81,25 +80,27 @@ export function AlertsList({
       </CardHeader>
       <CardContent className="flex flex-col flex-grow p-0">
         <Tabs defaultValue="drafts" className="flex flex-col flex-grow">
-          <div className="p-6">
+          <div className="p-6 pb-0">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="drafts">Drafts</TabsTrigger>
               <TabsTrigger value="active">Active</TabsTrigger>
               <TabsTrigger value="expired">Expired</TabsTrigger>
             </TabsList>
           </div>
-          <div className="flex-grow overflow-y-auto px-6">
-            <div className="space-y-3 p-1">
+          <div className="flex-grow overflow-y-auto p-6 space-y-3">
               <TabsContent value="drafts" className="mt-0">
-                {drafts.length > 0 ? (
-                  drafts.map(renderAlert)
-                ) : (
-                  <p className="text-center text-sm text-muted-foreground py-4">
-                    No draft alerts.
-                  </p>
-                )}
+                <div className="space-y-3">
+                  {drafts.length > 0 ? (
+                    drafts.map(renderAlert)
+                  ) : (
+                    <p className="text-center text-sm text-muted-foreground py-4">
+                      No draft alerts.
+                    </p>
+                  )}
+                </div>
               </TabsContent>
               <TabsContent value="active" className="mt-0">
+                <div className="space-y-3">
                 {active.length > 0 ? (
                   active.map(renderAlert)
                 ) : (
@@ -107,8 +108,10 @@ export function AlertsList({
                     No active alerts.
                   </p>
                 )}
+                </div>
               </TabsContent>
               <TabsContent value="expired" className="mt-0">
+                <div className="space-y-3">
                 {expired.length > 0 ? (
                   expired.map(renderAlert)
                 ) : (
@@ -116,8 +119,8 @@ export function AlertsList({
                     No expired alerts.
                   </p>
                 )}
+                </div>
               </TabsContent>
-            </div>
           </div>
         </Tabs>
       </CardContent>

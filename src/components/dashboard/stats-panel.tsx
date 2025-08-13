@@ -1,7 +1,8 @@
 'use client';
 /**
  * @fileoverview This component displays a statistical summary of "Actual"
- * (actual user status).
+ * (real-time user-reported status) data. It shows the number of users
+ * in each severity category (Green, Yellow, Orange, Red).
  */
 
 import type { Stats } from '@/lib/types';
@@ -18,7 +19,7 @@ interface StatsPanelProps {
 }
 
 /**
- * A small card component to display a single statistic (e.g., number of users in 'Green').
+ * A small card component to display a single statistic.
  */
 const StatCard = ({
   title,
@@ -36,11 +37,12 @@ const StatCard = ({
 );
 
 export function StatsPanel({ stats }: StatsPanelProps) {
-  // @backend-note The stats data is passed as a prop from MainDashboard.
+  // @backend-note The `stats` data is passed as a prop from `MainDashboard`.
   // This data is derived from the mock data in `src/lib/data.ts`.
-  // In a real application, this data would be fetched from a backend API.
-  // The 'actual' stats would likely come from a separate source (e.g., user reports)
-  // compared to forecast providers.
+  // In a real application, this data should be fetched from a backend API.
+  // The 'actual' stats would likely come from a separate system that collects
+  // real-time user reports, while forecast stats would come from weather providers.
+  // The backend should provide an endpoint to fetch this data, e.g., `/api/stats?countryId=...&date=...`.
 
   const actualStats = stats?.['actual'];
 
@@ -62,7 +64,7 @@ export function StatsPanel({ stats }: StatsPanelProps) {
           </div>
         ) : (
           <div>
-            <h4 className="text-sm font-semibold mb-2">Actual</h4>
+            <h4 className="text-sm font-semibold mb-2">Actual User Status</h4>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
               <StatCard
                 title="Green"

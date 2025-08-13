@@ -2,38 +2,48 @@
  * @file This file contains all the FAKE/MOCK data for the application.
  *
  * @backend-note
- * In a real-world application, this data should not exist. Instead, you would fetch
- * this information from your backend services via API calls. Each of these exports
- * represents a potential API endpoint. For example:
+ * In a real-world application, this file should be deleted. All the data exported
+ * from here should be fetched from backend services via API calls. Each function
+ * or constant in this file represents a potential API endpoint. The purpose of this
+ * file is to allow for frontend development and prototyping without a live backend.
  *
- * - `countries`: Could be fetched from a `GET /api/countries` endpoint. This might
- *   also include the region data with their SVG paths (or ideally GeoJSON data).
- * - `alerts`: Could be fetched from a `GET /api/alerts?countryId=...` endpoint.
- * - `statsByRegionForDate`, `nationalStatsForDate`: Could be fetched from a `GET /api/stats?...`
- *   endpoint with parameters for country, regions, and date.
- *
- * The backend developer's task is to create these endpoints and replace the usage
- * of this mock data in the components (primarily in `src/components/dashboard/main-dashboard.tsx`)
- * with `fetch` calls to the new APIs.
+ * The backend developer's primary task is to create the APIs described below and then
+ * replace the usage of this mock data in the components (primarily in `src/components/dashboard/main-dashboard.tsx`)
+ * with `fetch` calls to the new endpoints. The data structures for these endpoints
+ * should conform to the types defined in `src/lib/types.ts`.
  */
 
-import type { Alert, Country, ForecastProvider, Region, Stats } from './types';
+import type { Alert, Country, Region, Stats, Severity } from './types';
 import { format, subDays, addDays } from 'date-fns';
 
+/**
+ * @backend-note
+ * This function simulates fetching forecast data for a specific region and date.
+ * A real API might look like: `GET /api/forecasts?regionId=...&date=...`
+ * It should return forecast data from various providers.
+ */
 const generateForecastValue = (base: number, date: Date, regionName: string) => {
     const daySeed = date.getDate() + regionName.charCodeAt(0);
+    // Simple pseudo-random fluctuation based on the day and region name
     const randomFactor = ((daySeed % 15) - 7) / 10; // Fluctuation between -0.7 and +0.7
     return Math.max(0, Math.round(base * (1 + randomFactor)));
 }
 
+/**
+ * @backend-note
+ * This function simulates adding dynamic, date-specific data to a list of regions.
+ * In a real backend, this data would likely be joined with the base region data
+ * in a single API call, e.g., `GET /api/countries/{countryId}?date=...`.
+ */
 const addFakeDataToRegions = (regions: Omit<Region, 'path' | 'forecast' | 'thresholds'>[], date: Date): Region[] => {
   return regions.map(region => ({
     ...region,
-    path: '', // Path is no longer used for grid layout
+    path: '', // The SVG path is no longer used; a real map would use GeoJSON.
     forecast: {
       google: generateForecastValue(50, date, region.name + 'g'),
       openweather: generateForecastValue(55, date, region.name + 'o'),
     },
+    // Thresholds could be part of the region data or configured elsewhere.
     thresholds: {
       yellow: 40,
       orange: 60,
@@ -43,7 +53,12 @@ const addFakeDataToRegions = (regions: Omit<Region, 'path' | 'forecast' | 'thres
 }
 
 
-// FAKE DATA: List of countries and their regions.
+/**
+ * @backend-note
+ * This data represents static country and region information. This could be fetched
+ * from an endpoint like `GET /api/countries`. This list is then hydrated with
+ * dynamic data by `getCountries`.
+ */
 const getBaseCountries = (): Omit<Country, 'regions'> & { regions: Omit<Region, 'path' | 'forecast' | 'thresholds'>[] }[] => [
   {
     id: 'colombia',
@@ -59,17 +74,12 @@ const getBaseCountries = (): Omit<Country, 'regions'> & { regions: Omit<Region, 
       { id: 'macro-8', name: 'Amazonía' },
       { id: 'macro-9', name: 'Insular' },
       { id: 'macro-10', name: 'Noroccidente' },
-      { id: 'macro-11', name: 'Suroccidente' },
-      { id: 'macro-12', name: 'Centro Oriente' },
-      { id: 'macro-13', name: 'Centro Sur' },
-      { id: 'macro-14', name: 'Nororiente' },
-      { id: 'macro-15', name: 'Suroeste' },
-      { id: 'macro-16', name: 'Magdalena Medio' },
-      { id: 'macro-17', name: 'Alto Magdalena' },
-      { id: 'macro-18', name: 'Catatumbo' },
-      { id: 'macro-19', name: 'Bajo Cauca' },
-      { id: 'macro-20', name: 'Urabá' },
-      { id: 'macro-21', name: 'Piedemonte' },
+      { id: 'macro-11', 'name': 'Suroccidente' },
+      { id: 'macro-12', 'name': 'Centro Oriente' },
+      { id: 'macro-13', 'name': 'Centro Sur' },
+      { id: 'macro-14', 'name': 'Nororiente' },
+      { id: 'macro-15', 'name': 'Suroeste' },
+      { id: 'macro-16', 'name': 'Magdalena Medio' },
     ],
   },
   {
@@ -86,6 +96,12 @@ const getBaseCountries = (): Omit<Country, 'regions'> & { regions: Omit<Region, 
 ];
 
 const countryCache = new Map<string, Country[]>();
+/**
+ * @backend-note
+ * This function simulates fetching the list of countries along with their regions,
+ * with data that is specific to a given date (like forecasts). A real API endpoint
+ * might be `GET /api/countries?date={dateKey}`.
+ */
 export const getCountries = (dateKey: string): Country[] => {
   if (countryCache.has(dateKey)) {
     return countryCache.get(dateKey)!;
@@ -101,7 +117,12 @@ export const getCountries = (dateKey: string): Country[] => {
 
 
 const today = new Date();
-// FAKE DATA: Initial list of alerts.
+/**
+ * @backend-note
+ * This is a mock database of alerts. In a real application, this would be a database table.
+ * The data would be fetched from an endpoint like `GET /api/alerts?countryId=...`.
+ * The frontend would not have access to all alerts at once.
+ */
 export const alerts: Alert[] = [
   {
     id: 'alert-1',
@@ -210,7 +231,7 @@ export const alerts: Alert[] = [
   {
     id: 'alert-8',
     countryId: 'colombia',
-    regionIds: ['macro-20', 'macro-21'],
+    regionIds: ['macro-5', 'macro-6'],
     severity: 'yellow',
     eventType: 'Air Quality',
     pushDateTime: addDays(today, 3),
@@ -224,48 +245,39 @@ export const alerts: Alert[] = [
   },
 ];
 
-// FAKE DATA: List of forecast providers. This could be static or come from a config API.
-export const forecastProviders: ForecastProvider[] = [
-  { id: 'actual', name: 'Actual' },
-  { id: 'google', name: 'Google Weather' },
-  { id: 'openweather', name: 'OpenWeather' },
-  { id: 'other', name: 'Other Provider' },
-];
-
-// FAKE DATA: Statistical data per region.
-// This represents the number of users in each alert level (green, yellow, etc.)
-// for different forecast providers and for "actual" (actual reported status).
+/**
+ * @backend-note
+ * This is a mock database of statistical data per region. In a real application,
+ * this would be stored in a data warehouse or time-series database.
+ * The data would be fetched from an endpoint like `GET /api/stats/regions?date=...&regionIds=...`.
+ * The "actual" stats would come from a system that aggregates user reports.
+ */
 const baseStatsByRegion: { [regionId: string]: Stats } = {
   // Colombia
   'macro-1': {
     actual: { green: 260000, yellow: 75000, orange: 15000, red: 1000, total: 351000 },
-    google: { green: 250000, yellow: 80000, orange: 20000, red: 1500, total: 351500 },
-    openweather: { green: 280000, yellow: 70000, orange: 15000, red: 1000, total: 366000 },
   },
   'macro-2': {
     actual: { green: 190000, yellow: 55000, orange: 12000, red: 800, total: 257800 },
-    google: { green: 180000, yellow: 60000, orange: 15000, red: 1000, total: 256000 },
-    openweather: { green: 200000, yellow: 50000, orange: 12000, red: 800, total: 262800 },
   },
   'macro-4': {
     actual: { green: 125000, yellow: 38000, orange: 7500, red: 350, total: 170850 },
-    google: { green: 120000, yellow: 40000, orange: 8000, red: 400, total: 168400 },
-    openweather: { green: 130000, yellow: 35000, orange: 7000, red: 300, total: 172300 },
   },
   'macro-10': {
     actual: { green: 65000, yellow: 22000, orange: 3500, red: 100, total: 90600 },
-    google: { green: 60000, yellow: 25000, orange: 4000, red: 150, total: 89150 },
-    openweather: { green: 70000, yellow: 20000, orange: 3000, red: 100, total: 93100 },
   },
   // Kenya
   nairobi: {
     actual: { green: 16000, yellow: 4500, orange: 1000, red: 80, total: 21580 },
-    google: { green: 15000, yellow: 5000, orange: 1200, red: 100, total: 21300 },
-    openweather: { green: 18000, yellow: 2500, orange: 800, red: 50, total: 21350 },
   },
 };
 
-// Function to generate different stats for different days by applying a random multiplier
+/**
+ * @backend-note
+ * This function simulates how data might change day-to-day. A real backend would simply
+ * query its database for the requested date. This function exists purely for frontend
+ * prototyping to make the date navigator feel interactive.
+ */
 const generateDateVariantStats = (
   base: { [key: string]: Stats },
   date: Date
@@ -276,7 +288,8 @@ const generateDateVariantStats = (
   for (const id in base) {
     newStats[id] = {};
     for (const providerId in base[id]) {
-      const multiplier = 1 + ((dayOfMonth % 10) - 5) * 0.05 * ((id.length % 5) / 2); // Vary by up to ~25%
+      // Fluctuate stats pseudo-randomly based on the day of the month
+      const multiplier = 1 + ((dayOfMonth % 10) - 5) * 0.05 * ((id.length % 5) / 2);
       const providerStats = base[id][providerId];
       const newProviderStats = {
         green: Math.round(providerStats.green * multiplier),
@@ -297,6 +310,11 @@ const generateDateVariantStats = (
 };
 
 const statsCache = new Map<string, { [regionId: string]: Stats }>();
+/**
+ * @backend-note
+ * This function simulates fetching regional stats for a specific date. A real API
+ * would be something like `GET /api/stats/regions?date={dateKey}&countryId={countryId}`.
+ */
 export const statsByRegionForDate = (
   dateKey: string
 ): { [regionId: string]: Stats } => {
@@ -309,21 +327,26 @@ export const statsByRegionForDate = (
   return statsCache.get(dateKey)!;
 };
 
-// FAKE DATA: National-level statistics.
+/**
+ * @backend-note
+ * This is a mock database of national-level stats. This would be aggregated data
+ * stored in a data warehouse and fetched from an endpoint like `GET /api/stats/national?date=...&countryId=...`.
+ */
 const baseNationalStats: { [countryId: string]: Stats } = {
   colombia: {
     actual: { green: 2950000, yellow: 830000, orange: 165000, red: 9800, total: 3954800 },
-    google: { green: 2800000, yellow: 900000, orange: 200000, red: 12000, total: 3912000 },
-    openweather: { green: 3100000, yellow: 750000, orange: 160000, red: 9500, total: 4019500 },
   },
   kenya: {
     actual: { green: 1600000, yellow: 450000, orange: 100000, red: 8000, total: 2158000 },
-    google: { green: 1500000, yellow: 500000, orange: 120000, red: 10000, total: 2130000 },
-    openweather: { green: 1800000, yellow: 250000, orange: 80000, red: 5000, total: 2135000 },
   },
 };
 
 const nationalStatsCache = new Map<string, { [countryId: string]: Stats }>();
+/**
+ * @backend-note
+ * This function simulates fetching national stats for a specific date. A real API
+ * would be `GET /api/stats/national?date={dateKey}&countryId={countryId}`.
+ */
 export const nationalStatsForDate = (
   dateKey: string
 ): { [countryId: string]: Stats } => {

@@ -33,7 +33,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from '@/components/ui/card';
 import {
   Popover,
@@ -119,7 +118,7 @@ export function AlertForm({
    * It calls a server action which in turn calls a Genkit flow.
    * @backend-note This is where the frontend calls the AI backend. The `ensembleForecasts`
    * is currently mocked. This should be replaced with real forecast data to provide
-   * more accurate and relevant suggestions.
+   * more accurate and relevant suggestions. The server action for this is in `src/app/actions.ts`.
    */
   const handleSuggestJustification = async () => {
     setIsSuggesting(true);
@@ -162,7 +161,9 @@ export function AlertForm({
    * Handles the form submission.
    * It constructs a new alert object and calls the onSave prop.
    * @backend-note The `onSave` function currently updates the local state in `MainDashboard`.
-   * This should be replaced with an API call to the backend to persist the alert data.
+   * This should be replaced with an API call to the backend to persist the alert data
+   * (e.g., POST to `/api/alerts` for a new alert, or PUT to `/api/alerts/{alert.id}` to update).
+   * The backend should handle ID generation for new alerts.
    */
   function onSubmit(data: AlertFormValues) {
     if (selectedRegions.length === 0) {
@@ -202,7 +203,7 @@ export function AlertForm({
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-grow overflow-y-auto">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -388,8 +389,11 @@ export function AlertForm({
                 <FormItem>
                   <FormLabel>Image (Optional)</FormLabel>
                   {/* @backend-note Image upload functionality is currently a placeholder.
-                            This needs to be connected to a file storage service (e.g., Firebase Storage)
-                            and the `imageUrl` field in the form should be updated with the uploaded image's URL. */}
+                      This should be connected to a file storage service (e.g., Firebase Storage).
+                      The upload button should trigger a file selection, and upon successful upload,
+                      the `onSave` function should be called with the new image URL in the alert data.
+                      The backend will need an endpoint to handle the file upload.
+                  */}
                   <FormControl>
                     <div className="flex items-center gap-4">
                       {form.watch('imageUrl') && (

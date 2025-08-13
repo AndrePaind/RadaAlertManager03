@@ -6,7 +6,6 @@
  * - AlertForm: For creating and editing alerts.
  * - StatsPanel: Shows statistical data.
  * - MapView: Displays the geographical map and regions.
- * - LayerControls: Provides options to toggle map layers.
  */
 
 import { useState, useMemo, useEffect } from 'react';
@@ -38,11 +37,13 @@ export function MainDashboard() {
   // STATE MANAGEMENT
   // @backend-note All state is managed locally using `useState`. In a production environment,
   // this state should be fetched from and persisted to a backend. For more complex scenarios,
-  // a state management library like Redux or Zustand might be considered.
+  // a state management library like Redux or Zustand might be considered. The API calls to
+  // fetch data should be triggered in `useEffect` hooks or within the event handlers below.
 
   // The list of all alerts. Initialized with mock data.
   const [alerts, setAlerts] = useState<Alert[]>(initialAlerts);
 
+  // The list of all available countries.
   const [countries, setCountries] = useState<Country[]>([]);
 
   // The currently selected country. Defaults to the first country in the mock data.
@@ -60,22 +61,21 @@ export function MainDashboard() {
   // The currently selected date for viewing forecasts and alerts.
   const [currentDate, setCurrentDate] = useState(new Date());
 
+  // Effect to fetch and set country data when the component mounts or the date changes.
   useEffect(() => {
     const dateKey = format(currentDate, 'yyyy-MM-dd');
+    // @backend-note This should be an API call, e.g., `fetch('/api/countries?date=${dateKey}')`.
     const newCountries = getCountries(dateKey);
     setCountries(newCountries);
 
     if (!selectedCountry) {
       setSelectedCountry(newCountries[0]);
     } else {
+      // If a country was already selected, find its updated version (with new date-based data).
       const updatedCountry = newCountries.find(c => c.id === selectedCountry.id);
-      if (updatedCountry) {
-        setSelectedCountry(updatedCountry);
-      } else {
-        setSelectedCountry(newCountries[0]);
-      }
+      setSelectedCountry(updatedCountry || newCountries[0]);
     }
-  }, [currentDate, selectedCountry]);
+  }, [currentDate, selectedCountry?.id]); // Note: dependency on selectedCountry.id to avoid re-running on object reference change.
 
   // HANDLERS
 
@@ -86,7 +86,10 @@ export function MainDashboard() {
   /**
    * Handles changing the selected country.
    * @backend-note When a country changes, data for alerts, stats, and regions
-   * for the new country should be fetched from the backend.
+   * for the new country should be fetched from the backend. The current implementation
+   * filters local data, but this should be replaced with API calls like:
+   * `fetch(`/api/alerts?countryId=${countryId}`)`
+   * `fetch(`/api/stats?countryId=${countryId}&date=${currentDate}`)`
    */
   const handleSelectCountry = (countryId: string) => {
     const country = countries.find(c => c.id === countryId);
@@ -101,18 +104,16 @@ export function MainDashboard() {
 
   /**
    * Handles selecting an alert from the list.
-   * This populates the form with the alert's data.
+   * This populates the form with the alert's data and highlights the relevant regions.
    */
   const handleSelectAlert = (alert: Alert | null) => {
     setSelectedAlert(alert);
-    if (alert) {
-      const country = countries.find(c => c.id === alert.countryId);
-      if (country) setSelectedCountry(country);
+    setIsCreatingNew(false);
+    if (alert && selectedCountry) {
       // Populate selected regions based on the alert's data.
       setSelectedRegions(
-        country?.regions.filter(r => alert.regionIds.includes(r.id)) || []
+        selectedCountry.regions.filter(r => alert.regionIds.includes(r.id)) || []
       );
-      setIsCreatingNew(false);
     } else {
       setSelectedRegions([]);
     }
@@ -144,16 +145,20 @@ export function MainDashboard() {
   /**
    * Handles saving a new or updated alert.
    * @backend-note This function currently updates the local `alerts` state.
-   * This should be replaced with an API call to a backend endpoint (e.g., POST /api/alerts or PUT /api/alerts/:id)
-   * to persist the changes to the database.
+   * This should be replaced with an API call to a backend endpoint.
+   * - For a new alert: `POST /api/alerts` with the alert data.
+   * - For an existing alert: `PUT /api/alerts/${alertToSave.id}` with the updated data.
+   * The backend should return the saved alert object, which can then be used to update the local state.
    */
   const handleSaveAlert = (alertToSave: Alert) => {
-    const existing = alerts.find(a => a.id === alertToSave.id);
-    if (existing) {
-      setAlerts(alerts.map(a => (a.id === alertToSave.id ? alertToSave : a)));
-    } else {
-      setAlerts([...alerts, alertToSave]);
-    }
+    setAlerts(prevAlerts => {
+      const existing = prevAlerts.find(a => a.id === alertToSave.id);
+      if (existing) {
+        return prevAlerts.map(a => (a.id === alertToSave.id ? alertToSave : a));
+      } else {
+        return [...prevAlerts, alertToSave];
+      }
+    });
     setSelectedAlert(alertToSave);
     setIsCreatingNew(false);
   };
@@ -161,12 +166,15 @@ export function MainDashboard() {
   /**
    * Handles deleting an alert.
    * @backend-note This function currently filters the local `alerts` state.
-   * It should be replaced with an API call to a backend endpoint (e.g., DELETE /api/alerts/:id).
+   * It should be replaced with an API call to a backend endpoint:
+   * `DELETE /api/alerts/${alertId}`
+   * Upon successful deletion, the local state should be updated.
    */
   const handleDeleteAlert = (alertId: string) => {
     setAlerts(alerts.filter(a => a.id !== alertId));
     setSelectedAlert(null);
     setIsCreatingNew(false);
+    setSelectedRegions([]);
   };
 
   // MEMOIZED DERIVED STATE
@@ -174,7 +182,7 @@ export function MainDashboard() {
   /**
    * Filters alerts to show only those for the currently selected country.
    * @backend-note This client-side filtering should be replaced by a backend query,
-   * e.g., fetching `/api/alerts?countryId=${selectedCountry.id}`.
+   * e.g., fetching `/api/alerts?countryId=${selectedCountry.id}` when the country changes.
    */
   const countryAlerts = useMemo(() => {
     if (!selectedCountry) return [];
@@ -182,10 +190,12 @@ export function MainDashboard() {
   }, [alerts, selectedCountry]);
 
   /**
-   * Gets the active alerts for the selected date.
+   * Gets the active alerts for the selected date to display on the map.
+   * An alert is considered active on a date if its event date range includes that date.
    */
   const activeAlertsOnDate = useMemo(() => {
     return countryAlerts.filter(alert => {
+      if (alert.status === 'draft') return false;
       const from = startOfDay(new Date(alert.eventDates.from));
       const to = alert.eventDates.to
         ? startOfDay(new Date(alert.eventDates.to))
@@ -196,7 +206,8 @@ export function MainDashboard() {
   }, [countryAlerts, currentDate]);
 
   /**
-   * Computes the severity for each region based on active alerts for the selected date.
+   * Computes the highest severity for each region based on all active alerts for the selected date.
+   * This is used to color the regions on the map.
    */
   const regionSeverities = useMemo(() => {
     const severities = new Map<string, Severity>();
@@ -220,14 +231,16 @@ export function MainDashboard() {
   /**
    * Computes the statistics to display in the StatsPanel.
    * It shows national stats if no regions are selected, or aggregates stats for the selected regions.
-   * @backend-note This logic for aggregating stats is performed on the client.
+   * @backend-note This logic for fetching and aggregating stats is performed on the client.
    * For a real application, the backend should provide an endpoint that can return
-   * aggregated stats for a given set of regions (e.g., /api/stats?regionIds=...&countryId=...).
+   * stats for a given country, date, and optionally a list of regions.
+   * Example: `/api/stats?countryId=...&date=...&regionIds=...`
    */
   const currentStats = useMemo(() => {
     const dateKey = format(currentDate, 'yyyy-MM-dd');
     if (!selectedCountry) return null;
 
+    // @backend-note These should be API calls.
     const countryNationalStats = nationalStatsForDate(dateKey)[
       selectedCountry.id
     ];
@@ -279,7 +292,7 @@ export function MainDashboard() {
 
   return (
     <div className="flex flex-col h-screen">
-      <div className="p-4 md:px-6 border-b flex justify-between items-center">
+      <div className="p-4 md:px-6 border-b flex justify-between items-center flex-wrap gap-4">
         <Select value={selectedCountry.id} onValueChange={handleSelectCountry}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Select a country" />
@@ -320,9 +333,9 @@ export function MainDashboard() {
           </Button>
         </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 md:p-6 overflow-y-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 md:p-6 flex-1 overflow-y-auto">
         {/* Left Column: Alerts List */}
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-3 h-full">
           <AlertsList
             alerts={countryAlerts}
             selectedAlert={selectedAlert}
@@ -342,7 +355,6 @@ export function MainDashboard() {
             regionSeverities={regionSeverities}
           />
           {showForm ? (
-            <div className="xl:col-span-3">
               <AlertForm
                 key={selectedAlert?.id || 'new'} // Use key to force re-render on new alert
                 alert={selectedAlert}
@@ -351,14 +363,11 @@ export function MainDashboard() {
                 onSave={handleSaveAlert}
                 onDelete={handleDeleteAlert}
                 onCancel={() => {
-                  setSelectedAlert(null);
-                  setIsCreatingNew(false);
-                  setSelectedRegions([]);
+                  handleSelectAlert(null);
                 }}
               />
-            </div>
           ) : (
-            <Card className="xl:col-span-3 flex items-center justify-center h-full bg-card rounded-lg border border-dashed min-h-[200px]">
+            <Card className="flex items-center justify-center h-full bg-card rounded-lg border border-dashed min-h-[200px]">
               <div className="text-center text-muted-foreground">
                 <p>Select an alert to view details</p>
                 <p className="text-sm">or create a new one.</p>
