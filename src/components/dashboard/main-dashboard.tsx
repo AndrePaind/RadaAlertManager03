@@ -75,12 +75,18 @@ export function MainDashboard() {
   }, [alerts, selectedCountry]);
 
   const currentStats = useMemo(() => {
-    if (selectedRegions.length === 0) {
-      return nationalStats[selectedCountry.id];
+    const countryNationalStats = nationalStats[selectedCountry.id];
+    if (!countryNationalStats) {
+      return null;
     }
+
+    if (selectedRegions.length === 0) {
+      return countryNationalStats;
+    }
+    
     // Aggregate stats for selected regions
     const aggregated = {};
-    for (const provider of Object.keys(nationalStats[selectedCountry.id])) {
+    for (const provider of Object.keys(countryNationalStats)) {
       aggregated[provider] = { green: 0, yellow: 0, orange: 0, red: 0, total: 0 };
     }
 

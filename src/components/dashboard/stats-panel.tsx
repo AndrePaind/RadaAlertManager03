@@ -8,7 +8,7 @@ import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
 
 interface StatsPanelProps {
-  stats: Stats;
+  stats: Stats | null;
 }
 
 export function StatsPanel({ stats }: StatsPanelProps) {
@@ -25,6 +25,11 @@ export function StatsPanel({ stats }: StatsPanelProps) {
         <CardDescription>User counts per alert level for each forecast provider.</CardDescription>
       </CardHeader>
       <CardContent>
+        {!stats ? (
+           <div className="flex items-center justify-center h-24">
+            <p className="text-muted-foreground">No statistical data available for this selection.</p>
+          </div>
+        ) : (
         <Table>
           <TableHeader>
             <TableRow>
@@ -53,6 +58,7 @@ export function StatsPanel({ stats }: StatsPanelProps) {
             })}
           </TableBody>
         </Table>
+        )}
       </CardContent>
     </Card>
   );
