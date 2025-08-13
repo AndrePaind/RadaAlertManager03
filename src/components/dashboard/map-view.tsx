@@ -93,7 +93,7 @@ export function MapView({ country, selectedRegions, onToggleRegion, canSelectReg
         {/* @backend-note For a dynamic application, the GeoJSON or SVG path data for regions
             should be fetched from a backend service, especially if new countries or regions are added. */}
         <div className="w-full h-full rounded-lg bg-white dark:bg-gray-800 overflow-hidden relative" data-ai-hint="country map">
-          <svg viewBox="0 0 420 290" className="w-full h-full">
+          <svg viewBox="0 0 420 100" className="w-full h-full">
             <rect width="100%" height="100%" fill="currentColor" className="text-white dark:text-gray-800" />
             {regionsWithCenters.map((region) => {
               const isSelected = selectedRegions.some(sr => sr.id === region.id);
@@ -109,13 +109,13 @@ export function MapView({ country, selectedRegions, onToggleRegion, canSelectReg
                     )}
                   />
                   {/* Tooltip-like text on hover */}
-                  <text x={region.centerX} y={region.centerY} textAnchor="middle" dominantBaseline="middle" fontSize="10" fill="black" className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                  <text x={region.centerX} y={region.centerY} textAnchor="middle" dominantBaseline="middle" fontSize="6" fill="black" className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
                     {region.name}
                   </text>
                 </g>
               );
             })}
-             <text x={10} y={20} fontSize="12" className="fill-foreground/50 font-semibold">{country.name} Regions</text>
+             <text x={10} y={12} fontSize="8" className="fill-foreground/50 font-semibold">{country.name} Regions</text>
           </svg>
         </div>
       </CardContent>

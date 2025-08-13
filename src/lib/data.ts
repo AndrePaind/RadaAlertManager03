@@ -21,22 +21,36 @@ import type { Alert, Country, ForecastProvider, Stats } from './types';
 
 // FAKE DATA: List of countries and their regions.
 // The `path` property contains SVG path data for rendering the map.
+// The regions are laid out in a dense grid.
 export const countries: Country[] = [
   {
     id: 'colombia',
     name: 'Colombia',
-    regions: [
-      { id: 'bogota', name: 'Bogotá D.C.', path: 'M10 10 L82 10 L82 140 L10 140 Z' },
-      { id: 'antioquia', name: 'Antioquia', path: 'M92 10 L164 10 L164 140 L92 140 Z' },
-      { id: 'valle-del-cauca', name: 'Valle del Cauca', path: 'M174 10 L246 10 L246 140 L174 140 Z' },
-      { id: 'santander', name: 'Santander', path: 'M256 10 L328 10 L328 140 L256 140 Z' },
-      { id: 'bolivar', name: 'Bolívar', path: 'M338 10 L410 10 L410 140 L338 140 Z' },
-      { id: 'amazonas', name: 'Amazonas', path: 'M10 150 L82 150 L82 280 L10 280 Z' },
-      { id: 'cundinamarca', name: 'Cundinamarca', path: 'M92 150 L164 150 L164 280 L92 280 Z' },
-      { id: 'boyaca', name: 'Boyacá', path: 'M174 150 L246 150 L246 280 L174 280 Z' },
-      { id: 'narino', name: 'Nariño', path: 'M256 150 L328 150 L328 280 L256 280 Z' },
-      { id: 'magdalena', name: 'Magdalena', path: 'M338 150 L410 150 L410 280 L338 280 Z' },
-    ]
+    regions: ((regions) => {
+        const gridCols = 10;
+        const cellWidth = 38;
+        const cellHeight = 80;
+        const padding = 4;
+        return regions.map((region, index) => {
+            const col = index % gridCols;
+            const row = Math.floor(index / gridCols);
+            const x = col * (cellWidth + padding) + padding;
+            const y = row * (cellHeight + padding) + padding + 20; // +20 for title
+            const path = `M${x},${y} h${cellWidth} v${cellHeight} h-${cellWidth} Z`;
+            return { ...region, path };
+        });
+    })([
+      { id: 'bogota', name: 'Bogotá D.C.', path: '' },
+      { id: 'antioquia', name: 'Antioquia', path: '' },
+      { id: 'valle-del-cauca', name: 'Valle del Cauca', path: '' },
+      { id: 'santander', name: 'Santander', path: '' },
+      { id: 'bolivar', name: 'Bolívar', path: '' },
+      { id: 'amazonas', name: 'Amazonas', path: '' },
+      { id: 'cundinamarca', name: 'Cundinamarca', path: '' },
+      { id: 'boyaca', name: 'Boyacá', path: '' },
+      { id: 'narino', name: 'Nariño', path: '' },
+      { id: 'magdalena', name: 'Magdalena', path: '' },
+    ])
   },
   {
     id: 'kenya',
