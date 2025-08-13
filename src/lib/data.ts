@@ -19,6 +19,21 @@
 
 import type { Alert, Country, ForecastProvider, Stats } from './types';
 
+const createGridRegions = (regions: {id: string, name: string, path: string}[], gridCols: number) => {
+    const cellWidth = 120;
+    const cellHeight = 25;
+    const padding = 10;
+    const startY = 10;
+    return regions.map((region, index) => {
+        const col = index % gridCols;
+        const row = Math.floor(index / gridCols);
+        const x = col * (cellWidth + padding) + padding;
+        const y = row * (cellHeight + padding) + startY;
+        const path = `M${x},${y} h${cellWidth} v${cellHeight} h-${cellWidth} Z`;
+        return { ...region, path };
+    });
+};
+
 // FAKE DATA: List of countries and their regions.
 // The `path` property contains SVG path data for rendering the map.
 // The regions are laid out in a dense grid.
@@ -26,21 +41,7 @@ export const countries: Country[] = [
   {
     id: 'colombia',
     name: 'Colombia',
-    regions: ((regions) => {
-        const gridCols = 3;
-        const cellWidth = 120;
-        const cellHeight = 25;
-        const padding = 10; // Increased padding
-        const startY = 10; // Start grid lower
-        return regions.map((region, index) => {
-            const col = index % gridCols;
-            const row = Math.floor(index / gridCols);
-            const x = col * (cellWidth + padding) + padding;
-            const y = row * (cellHeight + padding) + startY;
-            const path = `M${x},${y} h${cellWidth} v${cellHeight} h-${cellWidth} Z`;
-            return { ...region, path };
-        });
-    })([
+    regions: createGridRegions([
       { id: 'macro-1', name: 'Caribe', path: '' },
       { id: 'macro-2', name: 'Eje Cafetero', path: '' },
       { id: 'macro-3', name: 'Pacífico', path: '' },
@@ -62,18 +63,18 @@ export const countries: Country[] = [
       { id: 'macro-19', name: 'Bajo Cauca', path: '' },
       { id: 'macro-20', name: 'Urabá', path: '' },
       { id: 'macro-21', name: 'Piedemonte', path: '' },
-    ])
+    ], 3)
   },
   {
     id: 'kenya',
     name: 'Kenya',
-    regions: [
-      { id: 'nairobi', name: 'Nairobi', path: 'M10 10 L82 10 L82 140 L10 140 Z' },
-      { id: 'mombasa', name: 'Mombasa', path: 'M92 10 L164 10 L164 140 L92 140 Z' },
-      { id: 'kisumu', name: 'Kisumu', path: 'M174 10 L246 10 L246 140 L174 140 Z' },
-      { id: 'nakuru', name: 'Nakuru', path: 'M256 10 L328 10 L328 140 L256 140 Z' },
-      { id: 'rift-valley', name: 'Rift Valley', path: 'M338 10 L410 10 L410 140 L338 140 Z' }
-    ],
+    regions: createGridRegions([
+      { id: 'nairobi', name: 'Nairobi', path: '' },
+      { id: 'mombasa', name: 'Mombasa', path: '' },
+      { id: 'kisumu', name: 'Kisumu', path: '' },
+      { id: 'nakuru', name: 'Nakuru', path: '' },
+      { id: 'rift-valley', name: 'Rift Valley', path: '' }
+    ], 3),
   },
 ];
 
