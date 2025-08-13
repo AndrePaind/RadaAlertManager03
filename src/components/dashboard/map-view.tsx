@@ -28,25 +28,24 @@ export function MapView({ country, selectedRegions, onToggleRegion, canSelectReg
     const [regionsWithCenters, setRegionsWithCenters] = useState<RegionWithCenter[]>([]);
 
     useEffect(() => {
-        // This code runs only on the client, after the component has mounted.
-        // This avoids the "document is not defined" error during server-side rendering.
+        // This effect calculates the center of each region's SVG path.
+        // It runs on the client-side to avoid SSR errors, as it needs access to the DOM.
         const calculatedRegions = country.regions.map(region => {
-            const tempDiv = document.createElement('div');
-            // Create a temporary SVG to accurately measure the bounding box of the path
-            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            svg.style.visibility = 'hidden';
-            svg.style.position = 'absolute';
+            // A temporary SVG is created in memory to measure the path's bounding box
+            // without actually rendering it to the screen.
+            const tempSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            tempSvg.style.visibility = 'hidden';
+            tempSvg.style.position = 'absolute';
 
             const pathElement = document.createElementNS("http://www.w3.org/2000/svg", "path");
             pathElement.setAttribute("d", region.path);
 
-            svg.appendChild(pathElement);
-            tempDiv.appendChild(svg);
-            document.body.appendChild(tempDiv);
+            tempSvg.appendChild(pathElement);
+            document.body.appendChild(tempSvg);
             
             const bbox = pathElement.getBBox();
             
-            document.body.removeChild(tempDiv);
+            document.body.removeChild(tempSvg);
             
             return {
                 ...region,
@@ -78,7 +77,14 @@ export function MapView({ country, selectedRegions, onToggleRegion, canSelectReg
             {regionsWithCenters.map((region) => {
               const isSelected = selectedRegions.some(sr => sr.id === region.id);
               const severity = regionSeverities.get(region.id);
-              const severityColor = severity ? severityColorMap[severity] : 'fill-primary/20';
+              
+              let fillColor = 'fill-gray-200 dark:fill-gray-600'; // Default color for no severity
+              if (severity) {
+                fillColor = severityColorMap[severity];
+              }
+              if (isSelected) {
+                fillColor = 'fill-primary/70';
+              }
               
               return (
                 <g key={region.id} onClick={() => canSelectRegions && onToggleRegion(region)} className={cn("group", canSelectRegions && "cursor-pointer")}>
@@ -86,9 +92,7 @@ export function MapView({ country, selectedRegions, onToggleRegion, canSelectReg
                     d={region.path}
                     className={cn(
                       'stroke-primary/50 stroke-2 transition-all',
-                      isSelected ? 'fill-primary/70' : severityColor,
-                      !canSelectRegions && severity ? severityColor : '',
-                      !canSelectRegions && !severity ? 'fill-gray-200' : '',
+                      fillColor,
                       canSelectRegions && 'group-hover:fill-primary/40'
                     )}
                   />

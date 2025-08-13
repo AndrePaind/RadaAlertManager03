@@ -23,7 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card } from '../ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { addDays, format } from 'date-fns';
+import { addDays, format, isToday } from 'date-fns';
 
 export function MainDashboard() {
   // STATE MANAGEMENT
@@ -242,15 +242,18 @@ export function MainDashboard() {
           </SelectContent>
         </Select>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
             <Button variant="outline" size="icon" onClick={() => handleDateChange(-1)}>
                 <ChevronLeft className="h-4 w-4" />
             </Button>
-            <div className="text-center font-medium">
+            <div className="text-center font-medium min-w-[140px]">
                 <p>{format(currentDate, 'PPP')}</p>
             </div>
             <Button variant="outline" size="icon" onClick={() => handleDateChange(1)}>
                 <ChevronRight className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" onClick={() => setCurrentDate(new Date())} disabled={isToday(currentDate)}>
+                Today
             </Button>
         </div>
       </div>
