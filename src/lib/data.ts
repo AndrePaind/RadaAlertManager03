@@ -27,10 +27,10 @@ export const countries: Country[] = [
     id: 'colombia',
     name: 'Colombia',
     regions: ((regions) => {
-        const gridCols = 10;
-        const cellWidth = 38;
-        const cellHeight = 80;
-        const padding = 4;
+        const gridCols = 3;
+        const cellWidth = 120;
+        const cellHeight = 25;
+        const padding = 5;
         return regions.map((region, index) => {
             const col = index % gridCols;
             const row = Math.floor(index / gridCols);
