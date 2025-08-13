@@ -13,7 +13,7 @@
 import { useState, useMemo } from 'react';
 import type { Alert, Country, Region, Severity, Stats } from '@/lib/types';
 // FAKE DATA: Importing mock data. In a real application, this would be fetched from a backend API.
-import { alerts as initialAlerts, countries, statsByRegion, nationalStats } from '@/lib/data';
+import { alerts as initialAlerts, countries, statsByRegionForDate, nationalStatsForDate } from '@/lib/data';
 import { AlertsList } from './alerts-list';
 import { LayerControls } from './layer-controls';
 import { MapView } from './map-view';
@@ -23,7 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card } from '../ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { addDays, format, isToday } from 'date-fns';
+import { addDays, format, isToday, startOfDay } from 'date-fns';
 
 export function MainDashboard() {
   // STATE MANAGEMENT
@@ -156,12 +156,9 @@ export function MainDashboard() {
    */
   const activeAlertsOnDate = useMemo(() => {
     return countryAlerts.filter(alert => {
-      const from = new Date(alert.eventDates.from);
-      from.setHours(0,0,0,0);
-      const to = alert.eventDates.to ? new Date(alert.eventDates.to) : from;
-      to.setHours(23,59,59,999);
-      const checkDate = new Date(currentDate);
-      checkDate.setHours(0,0,0,0);
+      const from = startOfDay(new Date(alert.eventDates.from));
+      const to = alert.eventDates.to ? startOfDay(new Date(alert.eventDates.to)) : from;
+      const checkDate = startOfDay(currentDate);
       return checkDate >= from && checkDate <= to;
     })
   }, [countryAlerts, currentDate]);
@@ -192,10 +189,13 @@ export function MainDashboard() {
    * aggregated stats for a given set of regions (e.g., /api/stats?regionIds=...&countryId=...).
    */
   const currentStats = useMemo(() => {
-    if (!nationalStats[selectedCountry.id]) {
+    const dateKey = format(currentDate, 'yyyy-MM-dd');
+    const countryNationalStats = nationalStatsForDate(dateKey)[selectedCountry.id];
+    const statsByRegion = statsByRegionForDate(dateKey);
+
+    if (!countryNationalStats) {
       return null;
     }
-    const countryNationalStats = nationalStats[selectedCountry.id];
     
     if (selectedRegions.length === 0) {
       return countryNationalStats;
@@ -221,7 +221,7 @@ export function MainDashboard() {
         }
     }
     return aggregated;
-  }, [selectedRegions, selectedCountry.id]);
+  }, [selectedRegions, selectedCountry.id, currentDate]);
   
   // Conditional rendering flags
   const showForm = isCreatingNew || selectedAlert;
