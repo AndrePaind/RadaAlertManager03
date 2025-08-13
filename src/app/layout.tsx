@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'AlertWise',
+  title: 'Rada Alert Manager',
   description: 'An intelligent alert management tool for MeteOps Leads.',
 };
 
